@@ -6,7 +6,8 @@ export enum MainProtocolSymbols {
   GRS = 'grs',
   COSMOS = 'cosmos',
   POLKADOT = 'polkadot',
-  KUSAMA = 'kusama'
+  KUSAMA = 'kusama',
+  ONE = 'one'
 }
 
 export enum SubProtocolSymbols {
@@ -14,6 +15,8 @@ export enum SubProtocolSymbols {
   XTZ_BTC = 'xtz-btc',
   XTZ_USD = 'xtz-usd',
   XTZ_STKR = 'xtz-stkr',
+  ONE_BUSD = 'one-busd',
+  ONE_IDRT = 'one-idrt',
   ETH_ERC20 = 'eth-erc20'
 }
 
