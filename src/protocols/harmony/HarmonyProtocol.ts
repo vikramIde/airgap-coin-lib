@@ -23,7 +23,7 @@ import { NonExtendedProtocol } from '../NonExtendedProtocol'
 import { HarmonyCryptoClient } from './HarmonyCryptoClient'
 
 import { HarmonyProtocolOptions } from './HarmonyProtocolOptions'
-import { TransactionListQuery } from './CosmosTransactionListQuery'
+import { TransactionListQuery } from './HarmonyTransactionListQuery'
 
 export class AeternityProtocol extends NonExtendedProtocol implements ICoinProtocol {
   public symbol: string = 'ONE'
@@ -146,9 +146,15 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
   }
 
   public async getTransactionsFromAddresses(addresses: string[], limit: number, offset: number): Promise<IAirGapTransaction[]> {
+    
+
     const allTransactions = await Promise.all(
       addresses.map((address) => {
-        return axios.get(`${this.options.network.rpcUrl}/middleware/transactions/account/${address}`)
+        const query: TransactionListQuery = new TransactionListQuery(offset, limit, address)
+        return axios.post(
+          `${this.options.network.rpcUrl}/`,
+          query.toJSONBody()
+        )
       })
     )
 
@@ -159,17 +165,22 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
     )
 
     return transactions.map((obj) => {
-      const parsedTimestamp = parseInt(obj.time, 10)
+      const parsedTimestamp = parseInt(obj.timestamp, 10)
       const airGapTx: IAirGapTransaction = {
-        amount: new BigNumber(obj.tx.amount).toString(10),
-        fee: new BigNumber(obj.tx.fee).toString(10),
-        from: [obj.tx.sender_id],
-        isInbound: addresses.indexOf(obj.tx.recipient_id) !== -1,
+        amount: new BigNumber(obj.tx.value).toString(10),
+        fee: new BigNumber(obj.tx.gasPrice).toString(10),
+        from: [obj.from],
+        isInbound: addresses.indexOf(obj.to) !== -1,
         protocolIdentifier: this.identifier,
         network: this.options.network,
-        to: [obj.tx.recipient_id],
-        hash: obj.hash,
-        blockHeight: obj.block_height
+        to: [obj.to],
+        hash: obj.blockHash,
+        blockHeight: obj.blockNumber,
+        data: obj.input,
+        extra:{
+          'shardID': obj.shardID,
+          'toShardID': obj.toShardID
+        }
       }
 
       if (obj.tx.payload) {
