@@ -1,16 +1,6 @@
-import * as sodium from 'libsodium-wrappers'
-
+import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
+import * as sha from '../../dependencies/src/sha.js-2.4.11/index'
 import { CryptoClient } from '../CryptoClient'
-
-const personalMessageToBinary = (message: string): Buffer => {
-  const prefix: Buffer = Buffer.from('‎Æternity Signed Message:\n', 'utf8')
-  const messageBuffer: Buffer = Buffer.from(message, 'utf8')
-  if (messageBuffer.length >= 0xfd) {
-    throw new Error('message too long')
-  }
-
-  return Buffer.concat([Buffer.from([prefix.length]), prefix, Buffer.from([messageBuffer.length]), messageBuffer])
-}
 
 export class HarmonyCryptoClient extends CryptoClient {
   constructor() {
@@ -18,20 +8,20 @@ export class HarmonyCryptoClient extends CryptoClient {
   }
 
   public async signMessage(message: string, keypair: { privateKey: Buffer }): Promise<string> {
-    await sodium.ready
+    const sha256Hash: string = sha('sha256').update(Buffer.from(message)).digest()
+    const hash: Buffer = Buffer.from(sha256Hash)
+    const signed: { signature: Buffer } = SECP256K1.sign(hash, keypair.privateKey)
 
-    const messageBuffer: Buffer = personalMessageToBinary(message)
-    const rawSignature: Uint8Array = sodium.crypto_sign_detached(messageBuffer, keypair.privateKey)
-
-    return Buffer.from(rawSignature).toString('hex')
+    return `0x${Buffer.from(signed.signature).toString('hex')}`
   }
 
   public async verifyMessage(message: string, signature: string, publicKey: string): Promise<boolean> {
-    await sodium.ready
+    const rawSignature: Buffer = Buffer.from(signature.slice(2), 'hex')
 
-    const rawSignature: Buffer = Buffer.from(signature, 'hex')
-    const messageBuffer: Buffer = personalMessageToBinary(message)
+    const sha256Hash: string = sha('sha256').update(Buffer.from(message)).digest()
+    const messageHash: Buffer = Buffer.from(sha256Hash)
 
-    return sodium.crypto_sign_verify_detached(rawSignature, messageBuffer, Buffer.from(publicKey, 'hex'))
+    return SECP256K1.verify(messageHash, rawSignature, Buffer.from(publicKey, 'hex'))
   }
+
 }

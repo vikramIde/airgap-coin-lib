@@ -2,12 +2,9 @@ import * as sodium from 'libsodium-wrappers'
 
 import axios from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
-import { mnemonicToSeed, validateMnemonic } from '../../dependencies/src/bip39-2.5.0/index'
+import { mnemonicToSeed } from '../../dependencies/src/bip39-2.5.0/index'
 import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
-import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
-import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
-const { Harmony } = require('@harmony-js/core');
-const { ChainID, ChainType } = require('@harmony-js/utils');
+import { generateWalletUsingDerivationPath } from '../../dependencies/src/hd-wallet-js-b216450e56954a6e82ace0aade9474673de5d9d5/src/index'
 import * as rlp from '../../dependencies/src/rlp-2.2.3/index'
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
 import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IAirGapTransaction'
@@ -60,8 +57,8 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
   public standardDerivationPath: string = `m/44'/1023'/0'/0/`
 
   public addressIsCaseSensitive: boolean = true
-  public addressValidationPattern: string = '^one1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{38}$'
-  public addressPlaceholder: string = 'one1_abc...'
+  public addressValidationPattern: string = '^one1[^one1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{38}$'
+  public addressPlaceholder: string = 'one_abc...'
 
   // ae specifics
   public defaultNetworkId: string = '0'
@@ -80,58 +77,44 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
     return this.options.network.blockExplorer.getTransactionLink(txId)
   }
 
-  public generateKeyPair(mnemonic: string, derivationPath: string = this.standardDerivationPath, password?: string): KeyPair {
-    validateMnemonic(mnemonic)
-    const seed = mnemonicToSeed(mnemonic, password)
-    const node = fromSeed(seed)
-
-    return this.generateKeyPairFromNode(node, derivationPath)
-  }
-
-  private generateKeyPairFromNode(node: BIP32Interface, derivationPath: string): KeyPair {
-    const keys = node.derivePath(derivationPath)
-    const privateKey = keys.privateKey
-    if (privateKey === undefined) {
-      throw new Error('Cannot generate private key')
-    }
-
-    return {
-      publicKey: keys.publicKey,
-      privateKey
-    }
-  }
-
   public async getPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    return this.generateKeyPair(mnemonic, derivationPath, password).publicKey.toString('hex')
+    const secret = mnemonicToSeed(mnemonic, password)
+
+    return this.getPublicKeyFromHexSecret(secret, derivationPath)
   }
 
   public async getPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<Buffer> {
-    return this.generateKeyPair(mnemonic, derivationPath, password).privateKey
+    const secret = mnemonicToSeed(mnemonic, password)
+
+    return this.getPrivateKeyFromHexSecret(secret, derivationPath)
   }
 
-
+  /**
+   * Returns the PublicKey as String, derived from a supplied hex-string
+   * @param secret HEX-Secret from BIP39
+   * @param derivationPath DerivationPath for Key
+   */
   public async getPublicKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
-    const node: BIP32Interface = fromSeed(Buffer.from(secret, 'hex'))
+    const { publicKey } = generateWalletUsingDerivationPath(Buffer.from(secret, 'hex'), derivationPath)
 
-    return this.generateKeyPairFromNode(node, derivationPath).publicKey.toString('hex')
+    return Buffer.from(publicKey).toString('hex')
   }
 
-  public getPublicKeyFromPrivateKey(privateKey: Buffer): Buffer {
-    const publicKey = SECP256K1.publicKeyCreate(privateKey)
-
-    return Buffer.from(publicKey, 'binary')
-  }
-
+  /**
+   * Returns the PrivateKey as Buffer, derived from a supplied hex-string
+   * @param secret HEX-Secret from BIP39
+   * @param derivationPath DerivationPath for Key
+   */
   public async getPrivateKeyFromHexSecret(secret: string, derivationPath: string): Promise<Buffer> {
-    const node = fromSeed(Buffer.from(secret, 'hex'))
+    const { secretKey } = generateWalletUsingDerivationPath(Buffer.from(secret, 'hex'), derivationPath)
 
-    return this.generateKeyPairFromNode(node, derivationPath).privateKey
+    return Buffer.from(secretKey)
   }
 
   public async getAddressFromPublicKey(publicKey: string): Promise<string> {
     const base58 = bs58check.encode(Buffer.from(publicKey, 'hex'))
 
-    return `one1_${base58}`
+    return `ak_${base58}`
   }
 
   public async getAddressesFromPublicKey(publicKey: string): Promise<string[]> {
