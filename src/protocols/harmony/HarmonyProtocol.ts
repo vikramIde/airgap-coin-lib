@@ -23,6 +23,7 @@ import { NonExtendedProtocol } from '../NonExtendedProtocol'
 import { HarmonyCryptoClient } from './HarmonyCryptoClient'
 
 import { HarmonyProtocolOptions } from './HarmonyProtocolOptions'
+import { TransactionListQuery } from './CosmosTransactionListQuery'
 
 export class AeternityProtocol extends NonExtendedProtocol implements ICoinProtocol {
   public symbol: string = 'ONE'
