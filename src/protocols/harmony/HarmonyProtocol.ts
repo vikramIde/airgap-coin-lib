@@ -176,15 +176,14 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
         to: [obj.to],
         hash: obj.blockHash,
         blockHeight: obj.blockNumber,
-        data: obj.input,
         extra:{
           'shardID': obj.shardID,
           'toShardID': obj.toShardID
         }
       }
 
-      if (obj.tx.payload) {
-        airGapTx.data = obj.tx.payload
+      if (obj.input) {
+          airGapTx.data = obj.input
       }
 
       if (!isNaN(parsedTimestamp)) {
