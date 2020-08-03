@@ -1,13 +1,13 @@
 import * as sodium from 'libsodium-wrappers'
-
+import { KeyPair } from '../../data/KeyPair'
 import axios from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
 import { mnemonicToSeed, validateMnemonic } from '../../dependencies/src/bip39-2.5.0/index'
 import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
-const { Harmony } = require('@harmony-js/core');
-const { ChainID, ChainType } = require('@harmony-js/utils');
+// const { Harmony } = require('@harmony-js/core');
+// const { ChainID, ChainType } = require('@harmony-js/utils');
 import * as rlp from '../../dependencies/src/rlp-2.2.3/index'
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
 import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IAirGapTransaction'
