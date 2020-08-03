@@ -14,7 +14,7 @@ export class TransactionListQuery {
             "pageSize": this.limit,
             "fullTx": true,
             "txType": "ALL",
-            "order": "ASC"
+            "order": "DESC"
           }
         ]
       }

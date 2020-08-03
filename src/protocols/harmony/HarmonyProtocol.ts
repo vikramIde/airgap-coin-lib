@@ -23,7 +23,8 @@ import { NonExtendedProtocol } from '../NonExtendedProtocol'
 import { HarmonyCryptoClient } from './HarmonyCryptoClient'
 
 import { HarmonyProtocolOptions } from './HarmonyProtocolOptions'
-import { TransactionListQuery } from './HarmonyTransactionListQuery'
+import { TransactionListQuery } from './Query/HarmonyTransactionListQuery'
+import { BalanceQuery } from './Query/HarmonyBalanceQuery'
 
 export class AeternityProtocol extends NonExtendedProtocol implements ICoinProtocol {
   public symbol: string = 'ONE'
@@ -178,7 +179,8 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
         blockHeight: obj.blockNumber,
         extra:{
           'shardID': obj.shardID,
-          'toShardID': obj.toShardID
+          'toShardID': obj.toShardID,
+          'nonce': obj.nonce
         }
       }
 
@@ -194,9 +196,10 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
     })
   }
 
+
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
     // sign and cut off first byte ('ae')
-    const rawTx = this.decodeTx(transaction.transaction)
+    const rawTx = this.decodeTx(transaction)
 
     await sodium.ready
     const signature = sodium.crypto_sign_detached(Buffer.concat([Buffer.from(transaction.networkId), rawTx]), privateKey)
@@ -279,7 +282,12 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
 
     for (const address of addresses) {
       try {
-        const { data } = await axios.get(`${this.options.network.rpcUrl}/v2/accounts/${address}`)
+        const query: BalanceQuery = new BalanceQuery(address)
+        const axiosResponse = await axios.post(
+          `${this.options.network.rpcUrl}/`,
+          query.toJSONBody()
+        )
+        const data =  axiosResponse.data
         balance = balance.plus(new BigNumber(data.balance))
       } catch (error) {
         // if node returns 404 (which means 'no account found'), go with 0 balance
@@ -346,8 +354,8 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
     const address: string = await this.getAddressFromPublicKey(publicKey)
 
     try {
-      const { data: accountResponse } = await axios.get(`${this.options.network.rpcUrl}/v2/accounts/${address}`)
-      nonce = accountResponse.nonce + 1
+      const  transactions = await this.getTransactionsFromAddresses([address], 1, 0)
+      nonce = transactions[0].extra.nonce + 1
     } catch (error) {
       // if node returns 404 (which means 'no account found'), go with nonce 0
       if (error.response && error.response.status !== 404) {
