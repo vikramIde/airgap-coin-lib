@@ -9,7 +9,6 @@ import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src
 const { Harmony, HarmonyAddress } = require('@harmony-js/core');
 const { getAddress } = require('@harmony-js/crypto');
 const { ChainID, ChainType, Unit } = require('@harmony-js/utils');
-import * as rlp from '../../dependencies/src/rlp-2.2.3/index'
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
 import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IAirGapTransaction'
 import { UnsignedHarmonyTransaction } from '../../serializer/schemas/definitions/transaction-sign-request-harmony'
@@ -394,6 +393,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       shardID: 0,
       toShardID: 0,
       gasLimit: gasEstimate,
+      nonce:nonce,
       gasPrice: new Unit.One(gasPrice).toHex()
     })
     
