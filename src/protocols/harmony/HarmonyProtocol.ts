@@ -1,13 +1,13 @@
 import * as sodium from 'libsodium-wrappers'
 import { KeyPair } from '../../data/KeyPair'
-import axios from '../../dependencies/src/axios-0.19.0/index'
+import axios  from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
 import { mnemonicToSeed, validateMnemonic } from '../../dependencies/src/bip39-2.5.0/index'
 import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
-// const { Harmony } = require('@harmony-js/core');
-// const { ChainID, ChainType } = require('@harmony-js/utils');
+const { Harmony } = require('@harmony-js/core');
+const { ChainID, ChainType } = require('@harmony-js/utils');
 import * as rlp from '../../dependencies/src/rlp-2.2.3/index'
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
 import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IAirGapTransaction'
@@ -16,6 +16,7 @@ import { SignedAeternityTransaction } from '../../serializer/schemas/definitions
 import { RawHarmonyTransaction } from '../../serializer/types'
 import bs64check from '../../utils/base64Check'
 import { padStart } from '../../utils/padStart'
+import { isString } from '../../utils/type'
 import { MainProtocolSymbols, ProtocolSymbols } from '../../utils/ProtocolSymbols'
 import { EthereumUtils } from '../ethereum/utils/utils'
 import { CurrencyUnit, FeeDefaults, ICoinProtocol } from '../ICoinProtocol'
@@ -26,7 +27,7 @@ import { HarmonyProtocolOptions } from './HarmonyProtocolOptions'
 import { TransactionListQuery } from './Query/HarmonyTransactionListQuery'
 import { BalanceQuery } from './Query/HarmonyBalanceQuery'
 
-export class AeternityProtocol extends NonExtendedProtocol implements ICoinProtocol {
+export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtocol {
   public symbol: string = 'ONE'
   public name: string = 'harmony'
   public marketSymbol: string = 'one'
@@ -69,7 +70,13 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
   public defaultNetworkId: string = '0'
 
   private readonly feesURL: string = 'https://api-airgap.gke.papers.tech/fees'
-
+  private  hmy = new Harmony(
+    'https://api.s0.b.hmny.io/',
+    {
+      chainType: ChainType.Harmony,
+      chainId: ChainID.HmyTestnet,
+    },
+  );
   constructor(public readonly options: HarmonyProtocolOptions = new HarmonyProtocolOptions()) {
     super()
   }
@@ -369,14 +376,21 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
       throw new Error('not enough balance')
     }
 
-    const sender = publicKey
+    const sender = this.getAddressFromPublicKey(publicKey)
+    const reciever = this.getAddressFromPublicKey(recipients[0])
     const recipient = bs58check.decode(recipients[0].replace('ak_', ''))
 
+    let newTx = this.hmy.transaction.newTx({
+      to: reciever,
+      value: new Unit(1).asOne().toWei(),
+
+
+    })
     const txObj = {
       tag: this.toHexBuffer(12),
       version: this.toHexBuffer(1),
-      sender_id: Buffer.concat([this.toHexBuffer(1), Buffer.from(sender, 'hex')]),
-      recipient_id: Buffer.concat([this.toHexBuffer(1), recipient]),
+      from: Buffer.concat([this.toHexBuffer(1), Buffer.from(sender, 'hex')]),
+      to: Buffer.concat([this.toHexBuffer(1), recipient]),
       amount: this.toHexBuffer(new BigNumber(values[0])),
       fee: this.toHexBuffer(new BigNumber(fee)),
       ttl: this.toHexBuffer(0),
@@ -422,4 +436,5 @@ export class AeternityProtocol extends NonExtendedProtocol implements ICoinProto
   public async getTransactionStatuses(transactionHashes: string[]): Promise<AirGapTransactionStatus[]> {
     return Promise.reject('Transaction status not implemented')
   }
+
 }

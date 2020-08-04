@@ -9,3 +9,11 @@ export function isRecord(obj: unknown): obj is Record<string, any> {
     Object.values(obj).every((value) => typeof value !== 'function')
   )
 }
+/**
+ * [isString verify param is a String]
+ * @param  {any}  obj [value]
+ * @return {Boolean}     [boolean]
+ */
+export const isString = (obj: any): boolean => {
+  return obj === `${obj}`;
+};
