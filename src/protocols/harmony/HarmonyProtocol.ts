@@ -3,11 +3,13 @@ import { KeyPair } from '../../data/KeyPair'
 import axios  from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
 import { mnemonicToSeed, validateMnemonic } from '../../dependencies/src/bip39-2.5.0/index'
+import { keccak256 } from '../../dependencies/src/ethereumjs-util-5.2.0/index'
 import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
-const { Harmony } = require('@harmony-js/core');
-const { ChainID, ChainType } = require('@harmony-js/utils');
+const { Harmony, HarmonyAddress } = require('@harmony-js/core');
+const { getAddress } = require('@harmony-js/crypto');
+const { ChainID, ChainType, Unit } = require('@harmony-js/utils');
 import * as rlp from '../../dependencies/src/rlp-2.2.3/index'
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
 import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IAirGapTransaction'
@@ -16,7 +18,6 @@ import { SignedAeternityTransaction } from '../../serializer/schemas/definitions
 import { RawHarmonyTransaction } from '../../serializer/types'
 import bs64check from '../../utils/base64Check'
 import { padStart } from '../../utils/padStart'
-import { isString } from '../../utils/type'
 import { MainProtocolSymbols, ProtocolSymbols } from '../../utils/ProtocolSymbols'
 import { EthereumUtils } from '../ethereum/utils/utils'
 import { CurrencyUnit, FeeDefaults, ICoinProtocol } from '../ICoinProtocol'
@@ -26,6 +27,8 @@ import { HarmonyCryptoClient } from './HarmonyCryptoClient'
 import { HarmonyProtocolOptions } from './HarmonyProtocolOptions'
 import { TransactionListQuery } from './Query/HarmonyTransactionListQuery'
 import { BalanceQuery } from './Query/HarmonyBalanceQuery'
+import { SendQuery } from './Query/HarmonySendQuery'
+import { EstimateGasQuery } from './Query/HarmonyEstimateGasQuery'
 
 export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtocol {
   public symbol: string = 'ONE'
@@ -111,7 +114,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   }
 
   public async getPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    return this.generateKeyPair(mnemonic, derivationPath, password).publicKey.toString('hex')
+    return '0x' + this.generateKeyPair(mnemonic, derivationPath, password).publicKey.toString('hex')
   }
 
   public async getPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<Buffer> {
@@ -122,7 +125,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   public async getPublicKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
     const node: BIP32Interface = fromSeed(Buffer.from(secret, 'hex'))
 
-    return this.generateKeyPairFromNode(node, derivationPath).publicKey.toString('hex')
+    return '0x' + this.generateKeyPairFromNode(node, derivationPath).publicKey.toString('hex')
   }
 
   public getPublicKeyFromPrivateKey(privateKey: Buffer): Buffer {
@@ -138,9 +141,10 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   }
 
   public async getAddressFromPublicKey(publicKey: string): Promise<string> {
-    const base58 = bs58check.encode(Buffer.from(publicKey, 'hex'))
-
-    return `one1_${base58}`
+    const ecKey = SECP256K1.keyFromPublic(publicKey.slice(2), 'hex');
+    const publicHash = ecKey.getPublic(false, 'hex');
+    const address = '0x' + keccak256('0x' + publicHash.slice(2)).slice(-40);
+    return getAddress(address).bech32;
   }
 
   public async getAddressesFromPublicKey(publicKey: string): Promise<string[]> {
@@ -159,10 +163,12 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     const allTransactions = await Promise.all(
       addresses.map((address) => {
         const query: TransactionListQuery = new TransactionListQuery(offset, limit, address)
-        return axios.post(
+        const { data } = await axios.post(
           `${this.options.network.rpcUrl}/`,
-          query.toJSONBody()
+          query.toJSONBody,
+          { headers: { 'Content-Type': 'application/json' } }
         )
+        return data
       })
     )
 
@@ -206,24 +212,13 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
     // sign and cut off first byte ('ae')
-    const rawTx = this.decodeTx(transaction)
-
-    await sodium.ready
-    const signature = sodium.crypto_sign_detached(Buffer.concat([Buffer.from(transaction.networkId), rawTx]), privateKey)
-
-    const txObj = {
-      tag: this.toHexBuffer(11),
-      version: this.toHexBuffer(1),
-      signatures: [Buffer.from(signature)],
-      transaction: rawTx
-    }
-
-    const txArray = Object.keys(txObj).map((a) => txObj[a])
-
-    const rlpEncodedTx = rlp.encode(txArray)
-    const signedEncodedTx = `tx_${bs64check.encode(rlpEncodedTx)}`
-
-    return signedEncodedTx
+    const rawTx = this.decodeTx(transaction.transaction)
+    const account = this.hmy.wallet.addByPrivateKey(privateKey);
+    const newTxn = this.hmy.transactions.newTx();
+    newTxn.recover(rawTx);
+    const signedTxn = await account.signTransaction(newTxn);
+  
+    return signedTxn
   }
 
   private decodeTx(transaction: string): any {
@@ -290,11 +285,11 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     for (const address of addresses) {
       try {
         const query: BalanceQuery = new BalanceQuery(address)
-        const axiosResponse = await axios.post(
+        const { data } = await axios.post(
           `${this.options.network.rpcUrl}/`,
-          query.toJSONBody()
+          query.toJSONBody,
+          { headers: { 'Content-Type': 'application/json' } }
         )
-        const data =  axiosResponse.data
         balance = balance.plus(new BigNumber(data.balance))
       } catch (error) {
         // if node returns 404 (which means 'no account found'), go with 0 balance
@@ -346,7 +341,14 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     values: string[],
     data?: any
   ): Promise<FeeDefaults> {
-    return (await axios.get(this.feesURL)).data
+    
+    const query: EstimateGasQuery = new EstimateGasQuery()
+    const axiosRes= await axios.post(
+      `${this.options.network.rpcUrl}/`,
+      query.toJSONBody,
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+    return axiosRes.data
   }
 
   public async prepareTransactionFromPublicKey(
@@ -376,34 +378,26 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       throw new Error('not enough balance')
     }
 
-    const sender = this.getAddressFromPublicKey(publicKey)
-    const reciever = this.getAddressFromPublicKey(recipients[0])
-    const recipient = bs58check.decode(recipients[0].replace('ak_', ''))
+    const sender = new HarmonyAddress(this.getAddressFromPublicKey(publicKey)).checksum
+    const reciever = new HarmonyAddress(recipients[0]).checksum
+    const gasPrice = .000000001
+    const gasEstimate = 21000
 
     let newTx = this.hmy.transaction.newTx({
       to: reciever,
-      value: new Unit(1).asOne().toWei(),
-
-
+      value: Unit.Szabo(values[0]).toWei(),
+      from: sender,
+      shardID: 0,
+      toShardID: 0,
+      gasLimit: gasEstimate,
+      gasPrice: new Unit.One(gasPrice).toHex()
     })
-    const txObj = {
-      tag: this.toHexBuffer(12),
-      version: this.toHexBuffer(1),
-      from: Buffer.concat([this.toHexBuffer(1), Buffer.from(sender, 'hex')]),
-      to: Buffer.concat([this.toHexBuffer(1), recipient]),
-      amount: this.toHexBuffer(new BigNumber(values[0])),
-      fee: this.toHexBuffer(new BigNumber(fee)),
-      ttl: this.toHexBuffer(0),
-      nonce: this.toHexBuffer(nonce),
-      payload: Buffer.from(payload || '')
-    }
-
-    const txArray = Object.keys(txObj).map((a) => txObj[a])
-    const rlpEncodedTx = rlp.encode(txArray)
-    const preparedTx = `tx_${bs64check.encode(rlpEncodedTx)}`
+    
+    let [unsignedRawTransaction, raw] = newTx.getRLPUnsigned();
+    const rlpEncodedTx = unsignedRawTransaction
 
     return {
-      transaction: preparedTx,
+      transaction: rlpEncodedTx,
       networkId: this.defaultNetworkId
     }
   }
@@ -411,9 +405,11 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   
 
   public async broadcastTransaction(rawTransaction: string): Promise<string> {
+    const query: SendQuery = new SendQuery(rawTransaction)
+
     const { data } = await axios.post(
-      `${this.options.network.rpcUrl}/v2/transactions`,
-      { tx: rawTransaction },
+      `${this.options.network.rpcUrl}/`,
+      query.toJSONBody,
       { headers: { 'Content-Type': 'application/json' } }
     )
 
@@ -437,13 +433,4 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return Promise.reject('Transaction status not implemented')
   }
 
-  private add0xToString = (obj: string): string => {
-    if (isString(obj) && !obj.startsWith('-')) {
-      return '0x' + obj.replace('0x', '');
-    } else if (isString(obj) && obj.startsWith('-')) {
-      return '-0x' + obj.replace('-', '');
-    } else {
-      throw new Error(`${obj} is not String`);
-    }
-  }
 }
