@@ -1,4 +1,3 @@
-import * as sodium from 'libsodium-wrappers'
 import { KeyPair } from '../../data/KeyPair'
 import axios  from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
@@ -13,8 +12,8 @@ const { ChainID, ChainType, Unit } = require('@harmony-js/utils');
 import * as rlp from '../../dependencies/src/rlp-2.2.3/index'
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
 import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IAirGapTransaction'
-import { UnsignedAeternityTransaction } from '../../serializer/schemas/definitions/transaction-sign-request-aeternity'
-import { SignedAeternityTransaction } from '../../serializer/schemas/definitions/transaction-sign-response-aeternity'
+import { UnsignedHarmonyTransaction } from '../../serializer/schemas/definitions/transaction-sign-request-harmony'
+import { SignedHarmonyTransaction } from '../../serializer/schemas/definitions/transaction-sign-response-harmony'
 import { RawHarmonyTransaction } from '../../serializer/types'
 import bs64check from '../../utils/base64Check'
 import { padStart } from '../../utils/padStart'
@@ -225,7 +224,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     let rawTx: any
 
     try {
-      rawTx = bs64check.decode(transaction.replace('tx_', ''))
+      rawTx = bs64check.decode(transaction)
 
       return rawTx
     } catch (error) {
@@ -233,7 +232,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     }
 
     try {
-      rawTx = bs58check.decode(transaction.replace('tx_', ''))
+      rawTx = bs58check.decode(transaction)
 
       return rawTx
     } catch (error) {
@@ -243,40 +242,45 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     throw new Error('invalid TX-encoding')
   }
 
-  public async getTransactionDetails(unsignedTx: UnsignedAeternityTransaction): Promise<IAirGapTransaction[]> {
+  public async getTransactionDetails(unsignedTx: UnsignedHarmonyTransaction): Promise<IAirGapTransaction[]> {
     const transaction = unsignedTx.transaction.transaction
-    const rlpEncodedTx = this.decodeTx(transaction)
-    const rlpDecodedTx = rlp.decode(rlpEncodedTx, false)
+    const newTxn = this.hmy.transactions.newTx();
+    newTxn.recover(transaction);
 
-    const airgapTx: IAirGapTransaction = {
-      amount: new BigNumber(parseInt(rlpDecodedTx[4].toString('hex'), 16)).toString(10),
-      fee: new BigNumber(parseInt(rlpDecodedTx[5].toString('hex'), 16)).toString(10),
-      from: [await this.getAddressFromPublicKey(rlpDecodedTx[2].slice(1).toString('hex'))],
-      isInbound: false,
-      protocolIdentifier: this.identifier,
-      network: this.options.network,
-      to: [await this.getAddressFromPublicKey(rlpDecodedTx[3].slice(1).toString('hex'))],
-      data: (rlpDecodedTx[8] || '').toString('utf8'),
-      transactionDetails: unsignedTx.transaction
+    const newAirgapTx: IAirGapTransaction = {
+        amount: newTxn.tx.value.toString(10),
+        fee: newTxn.tx.gasPrice.toString(10),
+        from: [newTxn.from],
+        isInbound: false,
+        protocolIdentifier: this.identifier,
+        network: this.options.network,
+        to: [newTxn.to],
+        hash: newTxn.blockHash,
+        blockHeight: newTxn.blockNumber,
+        extra: {
+          'shardID': newTxn.shardID,
+          'toShardID': newTxn.toShardID,
+          'nonce': newTxn.nonce
+        },
+        transactionDetails: unsignedTx.transaction
+      }
+    if (newTxn.input) {
+      newAirgapTx.data = newTxn.input
     }
-
-    return [airgapTx]
+    return [newAirgapTx]
   }
 
-  public async getTransactionDetailsFromSigned(signedTx: SignedAeternityTransaction): Promise<IAirGapTransaction[]> {
-    const rlpEncodedTx = this.decodeTx(signedTx.transaction)
-    const rlpDecodedTx = rlp.decode(rlpEncodedTx, false)
-
-    const unsignedAeternityTransaction: UnsignedAeternityTransaction = {
+  public async getTransactionDetailsFromSigned(signedTx: SignedHarmonyTransaction): Promise<IAirGapTransaction[]> {
+    const unsignedHarmonyTransaction: UnsignedHarmonyTransaction = {
       publicKey: '',
       callback: '',
       transaction: {
-        networkId: 'ae_mainnet',
-        transaction: `tx_${bs64check.encode(rlpDecodedTx[3])}`
+        networkId: this.defaultNetworkId,
+        transaction: signedTx.transaction
       }
     }
 
-    return this.getTransactionDetails(unsignedAeternityTransaction)
+    return this.getTransactionDetails(unsignedHarmonyTransaction)
   }
 
   public async getBalanceOfAddresses(addresses: string[]): Promise<string> {
