@@ -437,4 +437,13 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return Promise.reject('Transaction status not implemented')
   }
 
+  private add0xToString = (obj: string): string => {
+    if (isString(obj) && !obj.startsWith('-')) {
+      return '0x' + obj.replace('0x', '');
+    } else if (isString(obj) && obj.startsWith('-')) {
+      return '-0x' + obj.replace('-', '');
+    } else {
+      throw new Error(`${obj} is not String`);
+    }
+  }
 }
