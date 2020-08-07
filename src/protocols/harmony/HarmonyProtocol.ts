@@ -219,27 +219,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return signedTxn
   }
 
-  private decodeTx(transaction: string): any {
-    let rawTx: any
-
-    try {
-      rawTx = bs64check.decode(transaction)
-
-      return rawTx
-    } catch (error) {
-      //
-    }
-
-    try {
-      rawTx = bs58check.decode(transaction)
-
-      return rawTx
-    } catch (error) {
-      //
-    }
-
-    throw new Error('invalid TX-encoding')
-  }
 
   public async getTransactionDetails(unsignedTx: UnsignedHarmonyTransaction): Promise<IAirGapTransaction[]> {
     const transaction = unsignedTx.transaction.transaction
