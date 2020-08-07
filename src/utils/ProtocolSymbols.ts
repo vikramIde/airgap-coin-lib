@@ -15,8 +15,7 @@ export enum SubProtocolSymbols {
   XTZ_BTC = 'xtz-btc',
   XTZ_USD = 'xtz-usd',
   XTZ_STKR = 'xtz-stkr',
-  ONE_BUSD = 'one-busd',
-  ONE_IDRT = 'one-idrt',
+  // ONE_HRC20 = 'one-hrc20',
   ETH_ERC20 = 'eth-erc20'
 }
 

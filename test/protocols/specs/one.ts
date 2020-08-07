@@ -3,8 +3,8 @@ import { RawHarmonyTransaction } from '../../../src/serializer/types'
 import { TestProtocolSpec } from '../implementations'
 import { HarmonyProtocolStub } from '../stubs/one.stub'
 
-import { HarmonyProtocol } from './../../../src/protocols/harmony/HarmonyProtocol'
-import { HarmonyTransactionValidator } from './../../../src/serializer/unsigned-transactions/harmony-transactions.validator'
+import { HarmonyProtocol } from '../../../src/protocols/harmony/HarmonyProtocol'
+import { HarmonyTransactionValidator } from '../../../src/serializer/unsigned-transactions/harmony-transactions.validator'
 
 // Test Mnemonic:
 // mango club state husband keen fiber float jelly major include horse infant square spike equip caught version must pen swim setup right poem economy

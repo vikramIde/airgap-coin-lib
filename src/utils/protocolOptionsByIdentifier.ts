@@ -1,4 +1,5 @@
 import { AeternityProtocolNetwork, AeternityProtocolOptions } from '../protocols/aeternity/AeternityProtocolOptions'
+import { HarmonyProtocolNetwork, HarmonyProtocolOptions } from '../protocols/harmony/HarmonyProtocolOptions'
 import { BitcoinProtocolNetwork, BitcoinProtocolOptions } from '../protocols/bitcoin/BitcoinProtocolOptions'
 import { CosmosProtocolNetwork, CosmosProtocolOptions } from '../protocols/cosmos/CosmosProtocolOptions'
 import { EthereumProtocolNetwork, EthereumProtocolOptions } from '../protocols/ethereum/EthereumProtocolOptions'
@@ -26,6 +27,8 @@ const getProtocolOptionsByIdentifier: (identifier: ProtocolSymbols, network?: Pr
   switch (identifier) {
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
+    case MainProtocolSymbols.ONE:
+      return new HarmonyProtocolOptions(network ? (network as HarmonyProtocolNetwork) : new HarmonyProtocolNetwork())
     case MainProtocolSymbols.BTC:
       return new BitcoinProtocolOptions(network ? (network as BitcoinProtocolNetwork) : new BitcoinProtocolNetwork())
     case MainProtocolSymbols.ETH:

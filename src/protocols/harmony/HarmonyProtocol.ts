@@ -3,7 +3,7 @@ import axios  from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
 import { mnemonicToSeed, validateMnemonic } from '../../dependencies/src/bip39-2.5.0/index'
 import { keccak256 } from '../../dependencies/src/ethereumjs-util-5.2.0/index'
-import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
+// import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
 const { Harmony, HarmonyAddress } = require('@harmony-js/core');
@@ -14,10 +14,10 @@ import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IA
 import { UnsignedHarmonyTransaction } from '../../serializer/schemas/definitions/transaction-sign-request-harmony'
 import { SignedHarmonyTransaction } from '../../serializer/schemas/definitions/transaction-sign-response-harmony'
 import { RawHarmonyTransaction } from '../../serializer/types'
-import bs64check from '../../utils/base64Check'
-import { padStart } from '../../utils/padStart'
+// import bs64check from '../../utils/base64Check'
+// import { padStart } from '../../utils/padStart'
 import { MainProtocolSymbols, ProtocolSymbols } from '../../utils/ProtocolSymbols'
-import { EthereumUtils } from '../ethereum/utils/utils'
+// import { EthereumUtils } from '../ethereum/utils/utils'
 import { CurrencyUnit, FeeDefaults, ICoinProtocol } from '../ICoinProtocol'
 import { NonExtendedProtocol } from '../NonExtendedProtocol'
 import { HarmonyCryptoClient } from './HarmonyCryptoClient'
@@ -70,7 +70,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   // ae specifics
   public defaultNetworkId: string = '0'
 
-  private readonly feesURL: string = 'https://api-airgap.gke.papers.tech/fees'
+  // private readonly feesURL: string = 'https://api-airgap.gke.papers.tech/fees'
   private  hmy = new Harmony(
     'https://api.s0.b.hmny.io/',
     {
@@ -159,7 +159,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     
 
     const allTransactions = await Promise.all(
-      addresses.map((address) => {
+      addresses.map(async (address) => {
         const query: TransactionListQuery = new TransactionListQuery(offset, limit, address)
         const { data } = await axios.post(
           `${this.options.network.rpcUrl}/`,
@@ -377,6 +377,8 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     })
     
     let [unsignedRawTransaction, raw] = newTx.getRLPUnsigned();
+    console.log(raw);
+    
     const rlpEncodedTx = unsignedRawTransaction
 
     return {
@@ -399,11 +401,11 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return data.tx_hash
   }
 
-  private toHexBuffer(value: number | BigNumber): Buffer {
-    const hexString: string = EthereumUtils.toHex(value).substr(2)
+  // private toHexBuffer(value: number | BigNumber): Buffer {
+  //   const hexString: string = EthereumUtils.toHex(value).substr(2)
 
-    return Buffer.from(padStart(hexString, hexString.length % 2 === 0 ? hexString.length : hexString.length + 1, '0'), 'hex')
-  }
+  //   return Buffer.from(padStart(hexString, hexString.length % 2 === 0 ? hexString.length : hexString.length + 1, '0'), 'hex')
+  // }
 
   public async signMessage(message: string, keypair: { privateKey: Buffer }): Promise<string> {
     return new HarmonyCryptoClient().signMessage(message, keypair)
