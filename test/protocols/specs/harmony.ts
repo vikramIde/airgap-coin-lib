@@ -13,28 +13,28 @@ import { HarmonyTransactionValidator } from './../../../src/serializer/unsigned-
 // Public Key: d64f61ec56519e7f10f35908c40f7b3288fb3ebdc0f6c504aa95ec780e3c7ff9
 // HEX Seed: a109e38f00824ea80107cd7ccbac4e7afe7abe588eeac9191d71adf98fb1fba73311182c010a0182e20e67f4daa45bf1cbbbecab8ff407f33e50045d7d516e0c
 
-export class AETestProtocolSpec extends TestProtocolSpec {
+export class ONETestProtocolSpec extends TestProtocolSpec {
   public name = 'Harmony'
   public lib = new HarmonyProtocol()
   public stub = new HarmonyProtocolStub()
   public validAddresses = [
-    'ak_542o93BKHiANzqNaFj6UurrJuDuxU61zCGr9LJCwtTUg34kWt',
-    'ak_hb4E2MwjH8vYctr3cimoSHfg8Hg8NdWYQfpGhprKdaurRbNfi',
-    'ak_72TjHqojjETdkDTcERaTo2cgtXxCiNPL4dD3ZZjvFuS1VB7Xk',
-    'ak_BPr8M9Uh4HLJgShZTR3Gmjk524MtH6duCXyTLy9E3D6PWs5q7',
-    'ak_JRnrp9AvFUX5neTSHhU5tfnfd22uRc5HsmH3APXkZqC8QsNvw',
-    'ak_BQJzP7iTnfCKe8vWhDtPNvXqC6TiKf59oPkLuHMqRMqqBWZ3a',
-    'ak_DMNhUVW7xpNFFhs3pAwMzBeV8Q1o6tm57i1UdaxdRAQs39b8p',
-    'ak_2P9fjzQeSbMwfRyCPUhXos8oG3mm8B5YJn2vpuR6hNwFf2BRdb',
-    'ak_23Zr8vMCLxcMbFzvwv5pTePVeDHgXPzV2TCaLSS51NrTy5W91L',
-    'ak_2cxpdq6npukgL2x5pm56Q6rqrE2BfQ1Kd62JxZioMJeKg3LP3T',
-    'ak_27SFwPeBrgWaXnVgr51nKTN21DJq8B7jPeZ8oC59koEEnrmkSc'
+    'one1k5u0vllhkgdcux8hqc0gejnjcdkrs5z6mhk5v9',
+    'one1rn7z9dhdxcv7rnc6mw4d743tpp9qprekq39zwf',
+    'one18h3j75qhe5gr8f8k44ggf0h86ysgyppyrzvzq2',
+    'one14pd5rd2qepmla0hxu5gdljhnv36qgpr6s78z6h',
+    'one1ajnm2g67ttd0h6ry9vcntlzqqajtjee7n72egw',
+    'one1ddd4a8weu8rknkwcskv3q43ya083u73gkru2vr',
+    'one12fqzk7r6xyrkz69n5lhxev0q7yp670k7uqwp2c',
+    'one1hxttz4sgvxeknk59hw6jje9hfzqpnlrnz6r245',
+    'one109lvltgsyl409j8k2y982k8e7zrm7fzvav33ug',
+    'one1tkzhj0pq4254qcqvxlx2uau9crl89l5qy3z0ec',
+    'one1dvvr2wgwy35jqr9lve9twjek657wryu8urnuj3'
   ]
   public wallet = {
     privateKey:
-      '65093ac9899ced07211b56eaef83c2fdfef11ecea77a665d2d59cf93c40e5196d64f61ec56519e7f10f35908c40f7b3288fb3ebdc0f6c504aa95ec780e3c7ff9',
-    publicKey: 'd64f61ec56519e7f10f35908c40f7b3288fb3ebdc0f6c504aa95ec780e3c7ff9',
-    addresses: ['ak_2dPGHd5dZgKwR234uqPZcAXXcCyxr3TbWwgV8NSnNincth4Lf7']
+      "0x3302256de0e3787b3a108853e2cff624bfd35cbd2eff4be610910b01f68a000d",
+    publicKey: "0x02857eea06a0e8cca06b83fea72e40195233d0b18a71b31d836fcccdf73cb11216",
+    addresses: ["one1mu56l4l7rj6g02taevrmq8v2n2hn7javt22axm"]
   }
   public txs = [
     {
@@ -47,17 +47,17 @@ export class AETestProtocolSpec extends TestProtocolSpec {
         ttl: ? (maybe 1000),
         payload: ''
       */
-      to: ['ak_2dPGHd5dZgKwR234uqPZcAXXcCyxr3TbWwgV8NSnNincth4Lf7'],
-      from: ['ak_2dPGHd5dZgKwR234uqPZcAXXcCyxr3TbWwgV8NSnNincth4Lf7'],
-      amount: '10000000000000000000',
-      fee: '1000000000000000000',
+      to: ["0xdF29aFD7Fe1cB487A97DcB07B01d8A9Aaf3F4Bac"],
+      from: ["0xA72969d2CaD2ffe67Fb18d76f77948bC8D6135a8"],
+      amount: '100',
+      fee: '2100',
       unsignedTx: {
         transaction:
-          'tx_+FsMAaEB1k9h7FZRnn8Q81kIxA97Moj7Pr3A9sUEqpXseA48f/mhAdZPYexWUZ5/EPNZCMQPezKI+z69wPbFBKqV7HgOPH/5iIrHIwSJ6AAAiA3gtrOnZAAAAACAQCdXaA==',
+          '0xee80843b9aca0082a410808094df29afd7fe1cb487a97dcb07b01d8a9aaf3f4bac89056bc75e2d6310000080028080',
         networkId: 'ae_mainnet'
       },
       signedTx:
-        'tx_+KULAfhCuEBokDCnOXkU2G+pwrNXVQetMO1+2fQsnOeJKGcRl1S5toQAJRldCQb1VSkmF2yumQl11kmF2H6LpAH1npP71i0OuF34WwwBoQHWT2HsVlGefxDzWQjED3syiPs+vcD2xQSqlex4Djx/+aEB1k9h7FZRnn8Q81kIxA97Moj7Pr3A9sUEqpXseA48f/mIiscjBInoAACIDeC2s6dkAAAAAIAxkWE6'
+        '0xf86e06843b9aca0082a410808094df29afd7fe1cb487a97dcb07b01d8a9aaf3f4bac89056bc75e2d631000008027a07b44dc591656233f57d3d37dc47ae8fdfe18db38b87e80e110220aae3e89795da04f2c93dbd0cc6b7a63894dd70241239ef7f9702db928280b2ac01e5030d225b1'
     }
   ]
 
@@ -178,17 +178,16 @@ export class AETestProtocolSpec extends TestProtocolSpec {
   ]
   public validRawTransactions: RawHarmonyTransaction[] = [
     {
-      transaction:
-        'tx_+FsMAaEB1k9h7FZRnn8Q81kIxA97Moj7Pr3A9sUEqpXseA48f/mhAdZPYexWUZ5/EPNZCMQPezKI+z69wPbFBKqV7HgOPH/5iIrHIwSJ6AAAiA3gtrOnZAAAAACAQCdXaA==',
-      networkId: 'ae_mainnet'
+      transaction:"0xf86e06843b9aca0082a410808094df29afd7fe1cb487a97dcb07b01d8a9aaf3f4bac89056bc75e2d631000008027a07b44dc591656233f57d3d37dc47ae8fdfe18db38b87e80e110220aae3e89795da04f2c93dbd0cc6b7a63894dd70241239ef7f9702db928280b2ac01e5030d225b1",
+      networkId: '0'
     }
   ]
 
   public validSignedTransactions: SignedHarmonyTransaction[] = [
     {
-      accountIdentifier: 'd64f61ec56519e7f10f35908c40f7b3288fb3ebdc0f6c504aa95ec780e3c7ff9',
+      accountIdentifier: 'jkjlk',
       transaction:
-        'tx_+KULAfhCuEBokDCnOXkU2G+pwrNXVQetMO1+2fQsnOeJKGcRl1S5toQAJRldCQb1VSkmF2yumQl11kmF2H6LpAH1npP71i0OuF34WwwBoQHWT2HsVlGefxDzWQjED3syiPs+vcD2xQSqlex4Djx/+aEB1k9h7FZRnn8Q81kIxA97Moj7Pr3A9sUEqpXseA48f/mIiscjBInoAACIDeC2s6dkAAAAAIAxkWE6'
+        '0xf86e06843b9aca0082a410808094df29afd7fe1cb487a97dcb07b01d8a9aaf3f4bac89056bc75e2d631000008027a07b44dc591656233f57d3d37dc47ae8fdfe18db38b87e80e110220aae3e89795da04f2c93dbd0cc6b7a63894dd70241239ef7f9702db928280b2ac01e5030d225b1'
     }
   ]
 
