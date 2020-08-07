@@ -210,7 +210,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
     // sign and cut off first byte ('ae')
-    const rawTx = this.decodeTx(transaction.transaction)
+    const rawTx = transaction.transaction
     const account = this.hmy.wallet.addByPrivateKey(privateKey);
     const newTxn = this.hmy.transactions.newTx();
     newTxn.recover(rawTx);
