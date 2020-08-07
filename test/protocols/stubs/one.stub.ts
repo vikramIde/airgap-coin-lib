@@ -7,13 +7,9 @@ import { ProtocolHTTPStub, TestProtocolSpec } from '../implementations'
 export class HarmonyProtocolStub implements ProtocolHTTPStub {
   public registerStub(testProtocolSpec: TestProtocolSpec, protocol: HarmonyProtocol) {
     sinon
-      .stub(axios, 'get')
-      .withArgs(`${protocol.options.network.rpcUrl}/${testProtocolSpec.wallet.addresses[0]}`)
-      .returns(Promise.resolve({ data: { balance: 10000000000000000000, nonce: -1 } }))
-    sinon
-      .stub(axios, 'post')
-      .withArgs(`/`)
-      .returns(Promise.resolve({ tx_hash: 'tx_hash' }))
+      .stub(protocol, 'getBalanceOfAddresses')
+      .withArgs(testProtocolSpec.wallet.addresses[0])
+      .returns(Promise.resolve(new BigNumber(0)))
   }
   public noBalanceStub(testProtocolSpec: TestProtocolSpec, protocol: CosmosProtocol) {
     sinon
