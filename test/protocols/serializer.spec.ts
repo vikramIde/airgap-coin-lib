@@ -8,6 +8,7 @@ import { TestProtocolSpec } from './implementations'
 import { EthereumTestProtocolSpec } from './specs/ethereum'
 
 import { AETestProtocolSpec } from './specs/ae'
+import { ONETestProtocolSpec } from './specs/one'
 import { BitcoinProtocolSpec } from './specs/bitcoin'
 import { CosmosTestProtocolSpec } from './specs/cosmos'
 import { GenericERC20TokenTestProtocolSpec } from './specs/generic-erc20-token'
@@ -17,6 +18,7 @@ const protocols = [
   new EthereumTestProtocolSpec(),
   new BitcoinProtocolSpec(),
   new AETestProtocolSpec(),
+  new ONETestProtocolSpec(),
   new CosmosTestProtocolSpec(),
   new TezosTestProtocolSpec(),
   new GenericERC20TokenTestProtocolSpec()

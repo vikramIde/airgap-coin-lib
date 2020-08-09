@@ -10,7 +10,7 @@ export class HarmonyProtocolStub implements ProtocolHTTPStub {
       .withArgs(testProtocolSpec.wallet.addresses[0])
       .returns(Promise.resolve(new BigNumber(0)))
   }
-  public noBalanceStub(testProtocolSpec: TestProtocolSpec, protocol: CosmosProtocol) {
+  public noBalanceStub(testProtocolSpec: TestProtocolSpec, protocol: HarmonyProtocol) {
     sinon
       .stub(protocol, 'getBalanceOfAddresses')
       .withArgs([testProtocolSpec.wallet.addresses[0]])

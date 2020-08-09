@@ -1,13 +1,21 @@
 import { KeyPair } from '../../data/KeyPair'
 import axios  from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
-import { mnemonicToSeed, validateMnemonic } from '../../dependencies/src/bip39-2.5.0/index'
 import { keccak256 } from '../../dependencies/src/ethereumjs-util-5.2.0/index'
 // import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
 const { Harmony, HarmonyAddress } = require('@harmony-js/core');
-const { getAddress } = require('@harmony-js/crypto');
+import { 
+  bip39, 
+  // hdkey,
+  // EncryptOptions, 
+  getAddress, 
+  // generatePrivateKey,
+  // getPubkeyFromPrivateKey,
+  // getAddressFromPrivateKey
+ } from '@harmony-js/crypto';
+
 const { ChainID, ChainType, Unit } = require('@harmony-js/utils');
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
 import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IAirGapTransaction'
@@ -61,7 +69,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   ]
 
   public supportsHD: boolean = false
-  public standardDerivationPath: string = `m/44'/1023'/0'/0/`
+  public standardDerivationPath: string = `m/44'/60'/0'/0/0`
 
   public addressIsCaseSensitive: boolean = true
   public addressValidationPattern: string = '^one1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{38}$'
@@ -90,33 +98,29 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return this.options.network.blockExplorer.getTransactionLink(txId)
   }
 
-  public generateKeyPair(mnemonic: string, derivationPath: string = this.standardDerivationPath, password?: string): KeyPair {
-    validateMnemonic(mnemonic)
-    const seed = mnemonicToSeed(mnemonic, password)
-    const node = fromSeed(seed)
-
-    return this.generateKeyPairFromNode(node, derivationPath)
-  }
-
-  private generateKeyPairFromNode(node: BIP32Interface, derivationPath: string): KeyPair {
-    const keys = node.derivePath(derivationPath)
-    const privateKey = keys.privateKey
-    if (privateKey === undefined) {
-      throw new Error('Cannot generate private key')
+  public generateKeyPair(mnemonic: string, derivationPath: string = this.standardDerivationPath, password?:string): KeyPair {
+    if (!bip39.validateMnemonic(mnemonic)) {
+      throw new Error(`Invalid mnemonic phrase: ${mnemonic}`);
     }
+    let account = this.hmy.wallet.addByMnemonic(mnemonic);
+    console.log(account)
+    let publicKey = account.publicKey;
+    let privateKey = account.privateKey
 
     return {
-      publicKey: keys.publicKey,
+      publicKey,
       privateKey
     }
   }
 
   public async getPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    return '0x' + this.generateKeyPair(mnemonic, derivationPath, password).publicKey.toString('hex')
+    return this.generateKeyPair(mnemonic, derivationPath).publicKey.toString('hex')
   }
 
   public async getPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<Buffer> {
-    return this.generateKeyPair(mnemonic, derivationPath, password).privateKey
+    let pvtKey = this.generateKeyPair(mnemonic, derivationPath, password).privateKey.toString('hex')
+    let pvtKeyBuffer = new Buffer(pvtKey, "hex")
+    return pvtKeyBuffer
   }
 
 

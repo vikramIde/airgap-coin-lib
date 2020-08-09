@@ -18,7 +18,7 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
   public lib = new HarmonyProtocol()
   public stub = new HarmonyProtocolStub()
   public validAddresses = [
-    'one1k5u0vllhkgdcux8hqc0gejnjcdkrs5z6mhk5v9',
+    'one15cahsfs9mveqekme9jwqxr55pmhek2m9qdkg9u',
     'one1rn7z9dhdxcv7rnc6mw4d743tpp9qprekq39zwf',
     'one18h3j75qhe5gr8f8k44ggf0h86ysgyppyrzvzq2',
     'one14pd5rd2qepmla0hxu5gdljhnv36qgpr6s78z6h',
@@ -32,9 +32,9 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
   ]
   public wallet = {
     privateKey:
-      "0x3302256de0e3787b3a108853e2cff624bfd35cbd2eff4be610910b01f68a000d",
-    publicKey: "0x02857eea06a0e8cca06b83fea72e40195233d0b18a71b31d836fcccdf73cb11216",
-    addresses: ["one1mu56l4l7rj6g02taevrmq8v2n2hn7javt22axm"]
+      "0x5906b34bd8d7954835a248017f6a9d1eaed8480a48fd0d1e0e11eae9c79d691d",
+    publicKey: "0x02c3dab3927385d1fb24839ec7a9879040e9135a1bbb89a7dae3b79e6cf3ed7dc7",
+    addresses: ["one15cahsfs9mveqekme9jwqxr55pmhek2m9qdkg9u"]
   }
   public txs = [
     {
@@ -47,17 +47,17 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
         ttl: ? (maybe 1000),
         payload: ''
       */
-      to: ["0xdF29aFD7Fe1cB487A97DcB07B01d8A9Aaf3F4Bac"],
-      from: ["0xA72969d2CaD2ffe67Fb18d76f77948bC8D6135a8"],
+      to: ["0x1CfC22B6ED3619e1cf1AdBAadf562b084A008f36"],
+      from: ["0xa63b782605db320cDb792c9c030e940Eef9B2b65"],
       amount: '100',
       fee: '2100',
       unsignedTx: {
         transaction:
-          '0xee80843b9aca0082a410808094df29afd7fe1cb487a97dcb07b01d8a9aaf3f4bac89056bc75e2d6310000080028080',
-        networkId: 'ae_mainnet'
+          '0xee80843b9aca0082a4108080941cfc22b6ed3619e1cf1adbaadf562b084a008f3689056bc75e2d6310000080028080',
+        networkId: '0'
       },
       signedTx:
-        '0xf86e06843b9aca0082a410808094df29afd7fe1cb487a97dcb07b01d8a9aaf3f4bac89056bc75e2d631000008027a07b44dc591656233f57d3d37dc47ae8fdfe18db38b87e80e110220aae3e89795da04f2c93dbd0cc6b7a63894dd70241239ef7f9702db928280b2ac01e5030d225b1'
+        '0xf86e80843b9aca0082a4108080941cfc22b6ed3619e1cf1adbaadf562b084a008f3689056bc75e2d631000008027a0e50b5a8f97e032fd59a7baad40c5e8bb77dce702e96013feb1d65e16098b270ca02f3f4123a059242e7de8bc846849f755f3ddca72c05c939fbc28ba2d1cce0cbf'
     }
   ]
 
@@ -187,7 +187,7 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
     {
       accountIdentifier: 'jkjlk',
       transaction:
-        '0xf86e06843b9aca0082a410808094df29afd7fe1cb487a97dcb07b01d8a9aaf3f4bac89056bc75e2d631000008027a07b44dc591656233f57d3d37dc47ae8fdfe18db38b87e80e110220aae3e89795da04f2c93dbd0cc6b7a63894dd70241239ef7f9702db928280b2ac01e5030d225b1'
+        '0xf86e80843b9aca0082a4108080941cfc22b6ed3619e1cf1adbaadf562b084a008f3689056bc75e2d631000008027a0e50b5a8f97e032fd59a7baad40c5e8bb77dce702e96013feb1d65e16098b270ca02f3f4123a059242e7de8bc846849f755f3ddca72c05c939fbc28ba2d1cce0cbf'
     }
   ]
 
