@@ -183,8 +183,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
   public async getTransactionsFromAddresses(addresses: string[], limit: number=1000, offset: number=0): Promise<IAirGapTransaction[]> {
     
-    console.log('addresses',addresses)
-
     const allTransactions = await Promise.all(
       addresses.map(async (address) => {
         const query: TransactionListQuery = new TransactionListQuery(offset, limit, address)
@@ -196,6 +194,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
         return data.result.transactions
       })
     )
+
     const transactions: any[] = [].concat(
       ...allTransactions.map((axiosData) => {
         return axiosData || []
