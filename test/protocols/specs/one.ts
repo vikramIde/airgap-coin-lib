@@ -32,8 +32,8 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
   ]
   public wallet = {
     privateKey:
-      "0x5906b34bd8d7954835a248017f6a9d1eaed8480a48fd0d1e0e11eae9c79d691d",
-    publicKey: "0x02c3dab3927385d1fb24839ec7a9879040e9135a1bbb89a7dae3b79e6cf3ed7dc7",
+      "5906b34bd8d7954835a248017f6a9d1eaed8480a48fd0d1e0e11eae9c79d691d",
+    publicKey: "02c3dab3927385d1fb24839ec7a9879040e9135a1bbb89a7dae3b79e6cf3ed7dc7",
     addresses: ["one15cahsfs9mveqekme9jwqxr55pmhek2m9qdkg9u"]
   }
   public txs = [

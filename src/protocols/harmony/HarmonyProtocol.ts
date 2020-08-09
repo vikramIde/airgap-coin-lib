@@ -113,14 +113,27 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     }
   }
 
+  private generateKeyPairFromNode(node: any, derivationPath: string): KeyPair {
+    const keys = node.derive(derivationPath)
+    const privateKey = keys.privateKey
+    if (privateKey === undefined) {
+      throw new Error('Cannot generate private key')
+    }
+
+    return {
+      publicKey: keys.publicKey,
+      privateKey
+    }
+  }
+
   public async getPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    return this.generateKeyPair(mnemonic, derivationPath).publicKey.toString('hex')
+    return this.generateKeyPair(mnemonic, derivationPath).publicKey.toString('hex').slice(2)
   }
 
   public async getPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<Buffer> {
-    let pvtKey = this.generateKeyPair(mnemonic, derivationPath, password).privateKey.toString('hex')
-    let pvtKeyBuffer = new Buffer(pvtKey, "hex")
-    return pvtKeyBuffer
+    let key = this.generateKeyPair(mnemonic, derivationPath, password).privateKey.toString('hex')
+    let newPvt = Buffer.from(key.slice(2), "hex")
+    return newPvt
   }
 
 

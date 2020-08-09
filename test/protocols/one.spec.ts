@@ -31,7 +31,6 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
 
         // check if privateKey is a Buffer
         expect(privateKey).to.be.instanceof(Buffer)
-
         // check if privateKey matches to supplied one
         expect(privateKey.toString('hex')).to.equal(protocol.wallet.privateKey)
     })
