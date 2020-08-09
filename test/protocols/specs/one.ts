@@ -18,6 +18,7 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
   public lib = new HarmonyProtocol()
   public stub = new HarmonyProtocolStub()
   public validAddresses = [
+    "one15u5kn5k26tl7vla334m0w72ghjxkzddgw7mtuk",
     'one15cahsfs9mveqekme9jwqxr55pmhek2m9qdkg9u',
     'one1rn7z9dhdxcv7rnc6mw4d743tpp9qprekq39zwf',
     'one18h3j75qhe5gr8f8k44ggf0h86ysgyppyrzvzq2',

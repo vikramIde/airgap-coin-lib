@@ -134,7 +134,7 @@ protocols.forEach(async (protocol: TestProtocolSpec) => {
         }
       )
 
-      itIf(
+          itIf(
         !protocol.lib.supportsHD,
         'getAddressFromPublicKey - should be able to create a valid address from a supplied publicKey',
         async () => {
@@ -147,7 +147,7 @@ protocols.forEach(async (protocol: TestProtocolSpec) => {
           // check if address matches to supplied one
           expect(address).to.equal(protocol.wallet.addresses[0], 'address does not match')
         }
-      )
+      ) 
 
       itIf(
         protocol.lib.supportsHD,

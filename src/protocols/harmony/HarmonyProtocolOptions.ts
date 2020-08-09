@@ -6,7 +6,8 @@ import { ProtocolOptions } from '../../utils/ProtocolOptions'
 
 const MAINNET_NAME: string = 'Mainnet'
 
-const NODE_URL: string = 'https://api.s0.t.hmny.io'
+// const NODE_URL: string = 'https://api.s0.t.hmny.io'
+const NODE_URL: string = 'https://api.s0.b.hmny.io'
 
 const BLOCK_EXPLORER_URL: string = 'https://explorer.harmony.one/#'
 

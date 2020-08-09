@@ -1,7 +1,7 @@
 import { KeyPair } from '../../data/KeyPair'
 import axios  from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
-import { keccak256 } from '../../dependencies/src/ethereumjs-util-5.2.0/index'
+// import { keccak256 } from '../../dependencies/src/ethereumjs-util-5.2.0/index'
 // import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
@@ -11,6 +11,7 @@ import {
   // hdkey,
   // EncryptOptions, 
   getAddress, 
+  // getAddressFromPublicKey,
   // generatePrivateKey,
   // getPubkeyFromPrivateKey,
   // getAddressFromPrivateKey
@@ -103,7 +104,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       throw new Error(`Invalid mnemonic phrase: ${mnemonic}`);
     }
     let account = this.hmy.wallet.addByMnemonic(mnemonic);
-    console.log(account)
     let publicKey = account.publicKey;
     let privateKey = account.privateKey
 
@@ -136,6 +136,9 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return newPvt
   }
 
+  public async getExtendedPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
+    throw new Error('extended private key support for harmony not implemented')
+  }
 
   public async getPublicKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
     const node: BIP32Interface = fromSeed(Buffer.from(secret, 'hex'))
@@ -155,11 +158,17 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return this.generateKeyPairFromNode(node, derivationPath).privateKey
   }
 
+  // public async getAddressFromPublicKey(publicKey: string): Promise<string> {
+  //   this.hmy.crypto.getAddressesFromPublicKey()
+  //   SECP256K1.
+  //   const ecKey = SECP256K1.keyFromPublic(publicKey, 'hex');
+  //   const publicHash = ecKey.getPublic(false, 'hex');
+  //   const address = '0x' + keccak256('0x' + publicHash.slice(2)).slice(-40);
+  //   return getAddress(address).bech32;
+  // }
   public async getAddressFromPublicKey(publicKey: string): Promise<string> {
-    const ecKey = SECP256K1.keyFromPublic(publicKey.slice(2), 'hex');
-    const publicHash = ecKey.getPublic(false, 'hex');
-    const address = '0x' + keccak256('0x' + publicHash.slice(2)).slice(-40);
-    return getAddress(address).bech32;
+    let key = this.hmy.crypto.getAddressFromPublicKey('0x'+publicKey)
+    return getAddress(key).bech32;
   }
 
   public async getAddressesFromPublicKey(publicKey: string): Promise<string[]> {
@@ -172,32 +181,32 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return this.getTransactionsFromAddresses([await this.getAddressFromPublicKey(publicKey)], limit, offset)
   }
 
-  public async getTransactionsFromAddresses(addresses: string[], limit: number, offset: number): Promise<IAirGapTransaction[]> {
+  public async getTransactionsFromAddresses(addresses: string[], limit: number=1000, offset: number=0): Promise<IAirGapTransaction[]> {
     
+    console.log('addresses',addresses)
 
     const allTransactions = await Promise.all(
       addresses.map(async (address) => {
         const query: TransactionListQuery = new TransactionListQuery(offset, limit, address)
         const { data } = await axios.post(
           `${this.options.network.rpcUrl}/`,
-          query.toJSONBody,
+          query.toJSONBody(),
           { headers: { 'Content-Type': 'application/json' } }
         )
-        return data
+        return data.result.transactions
       })
     )
-
     const transactions: any[] = [].concat(
       ...allTransactions.map((axiosData) => {
-        return axiosData.data || []
+        return axiosData || []
       })
     )
-
+    
     return transactions.map((obj) => {
       const parsedTimestamp = parseInt(obj.timestamp, 10)
       const airGapTx: IAirGapTransaction = {
-        amount: new BigNumber(obj.tx.value).toString(10),
-        fee: new BigNumber(obj.tx.gasPrice).toString(10),
+        amount: new BigNumber(obj.value).toString(10),
+        fee: new BigNumber(obj.gasPrice).toString(10),
         from: [obj.from],
         isInbound: addresses.indexOf(obj.to) !== -1,
         protocolIdentifier: this.identifier,
