@@ -6,6 +6,7 @@ import * as sinon from 'sinon'
 // import axios from '../../src/dependencies/src/axios-0.19.0/index'
 // import BigNumber from '../../src/dependencies/src/bignumber.js-9.0.0/bignumber'
 // import { RawHarmonyTransaction } from '../../src/serializer/types'
+import { IAirGapTransaction } from '../../src'
 
 import { ONETestProtocolSpec } from './specs/one'
 
@@ -168,5 +169,30 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
         txs.forEach((tx, index) => {
             expect(tx).to.equal(protocol.txs[index].signedTx)
         })
+    })
+
+    it('getTransactionDetails - Is able to extract all necessary properties from a TX', async () => {
+        for (const tx of protocol.txs) {
+            const airgapTxs: IAirGapTransaction[] = await protocol.lib.getTransactionDetails({
+                publicKey: protocol.wallet.publicKey,
+                transaction: tx.unsignedTx
+            })
+
+            if (airgapTxs.length !== 1) {
+                throw new Error('Unexpected number of transactions')
+            }
+
+            const airgapTx: IAirGapTransaction = airgapTxs[0]
+
+            expect(airgapTx.to, 'to property does not match').to.deep.equal(tx.to)
+            // expect(airgapTx.from, 'from property does not match').to.deep.equal(tx.from)
+
+            expect(airgapTx.amount, 'amount does not match').to.deep.equal(protocol.txs[0].amount)
+            expect(airgapTx.fee, 'fee does not match').to.deep.equal(protocol.txs[0].fee)
+
+            expect(airgapTx.protocolIdentifier, 'protocol-identifier does not match').to.equal(protocol.lib.identifier)
+
+            // expect(airgapTx.transactionDetails, 'extras should exist').to.not.be.undefined
+        }
     })
 })

@@ -51,7 +51,7 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
       to: ["one15u5kn5k26tl7vla334m0w72ghjxkzddgw7mtuk"],
       from: ["one15cahsfs9mveqekme9jwqxr55pmhek2m9qdkg9u"],
       amount: '100',
-      fee: '2100',
+      fee: '0.000000001',
       unsignedTx: {
         transaction:
           '0xee01843b9aca0082a410808094a72969d2cad2ffe67fb18d76f77948bc8d6135a889056bc75e2d6310000080028080',

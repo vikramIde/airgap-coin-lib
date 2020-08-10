@@ -245,18 +245,46 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   }
 
   public async getTransactionDetails(unsignedTx: UnsignedHarmonyTransaction): Promise<IAirGapTransaction[]> {
+    // console.log(unsignedTx)
     const transaction = unsignedTx.transaction.transaction
     const newTxn = this.hmy.transactions.newTx();
+    let sender:string=''
+    let reciever:string=''
+    let value:number =0
+    let fee:number =0
     newTxn.recover(transaction);
+    // console.log(newTxn)
+
+    if (newTxn.from !='0x')
+    sender = this.hmy.crypto.getAddress(newTxn.from).bech32
+
+    if (newTxn.to != '0x')
+    reciever = this.hmy.crypto.getAddress(newTxn.to).bech32
+
+    if (newTxn.value.toString(10)) {
+      const coins = new this.hmy.utils.Unit(newTxn.value)
+        .asWei()
+        .toOne();
+      value = parseInt(coins)
+
+    }
+
+    if (newTxn.gasPrice.toString(10)) {
+       fee = new this.hmy.utils.Unit(newTxn.gasPrice)
+        .asWei()
+        .toOne()
+    }
+
+    // let coins = new BigNumber(Number('0x' + newTxn.value.toString('hex'))).div(1e12).toNumber()
 
     const newAirgapTx: IAirGapTransaction = {
-        amount: newTxn.tx.value.toString(10),
-        fee: newTxn.tx.gasPrice.toString(10),
-        from: [newTxn.from],
+        amount: value.toString(),
+        fee: fee.toString(),
+        from: [sender],
         isInbound: false,
         protocolIdentifier: this.identifier,
         network: this.options.network,
-        to: [newTxn.to],
+        to: [reciever],
         hash: newTxn.blockHash,
         blockHeight: newTxn.blockNumber,
         extra: {
