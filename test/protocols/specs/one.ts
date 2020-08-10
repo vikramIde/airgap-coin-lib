@@ -48,17 +48,17 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
         ttl: ? (maybe 1000),
         payload: ''
       */
-      to: ["0x1CfC22B6ED3619e1cf1AdBAadf562b084A008f36"],
-      from: ["0xa63b782605db320cDb792c9c030e940Eef9B2b65"],
+      to: ["one15u5kn5k26tl7vla334m0w72ghjxkzddgw7mtuk"],
+      from: ["one15cahsfs9mveqekme9jwqxr55pmhek2m9qdkg9u"],
       amount: '100',
       fee: '2100',
       unsignedTx: {
         transaction:
-          '0xee80843b9aca0082a4108080941cfc22b6ed3619e1cf1adbaadf562b084a008f3689056bc75e2d6310000080028080',
+          '0xee01843b9aca0082a410808094a72969d2cad2ffe67fb18d76f77948bc8d6135a889056bc75e2d6310000080028080',
         networkId: '0'
       },
       signedTx:
-        '0xf86e80843b9aca0082a4108080941cfc22b6ed3619e1cf1adbaadf562b084a008f3689056bc75e2d631000008027a0e50b5a8f97e032fd59a7baad40c5e8bb77dce702e96013feb1d65e16098b270ca02f3f4123a059242e7de8bc846849f755f3ddca72c05c939fbc28ba2d1cce0cbf'
+        '0xf86e80843b9aca0082a410808094a72969d2cad2ffe67fb18d76f77948bc8d6135a889056bc75e2d631000008027a03d04c763ed4f5461c5ec20e8eacdd09e662360d0ce206679a84590c7f23f47c9a00962de471cf816dd1320ccb8c0754430c99aba441a77870dfb7f3548375b82d0'
     }
   ]
 

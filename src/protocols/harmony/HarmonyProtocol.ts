@@ -5,7 +5,7 @@ import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
 // import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
-const { Harmony, HarmonyAddress } = require('@harmony-js/core');
+const { Harmony } = require('@harmony-js/core');
 import { 
   bip39, 
   // hdkey,
@@ -15,6 +15,7 @@ import {
   // generatePrivateKey,
   // getPubkeyFromPrivateKey,
   // getAddressFromPrivateKey
+  HarmonyAddress
  } from '@harmony-js/crypto';
 
 const { ChainID, ChainType, Unit } = require('@harmony-js/utils');
@@ -234,16 +235,14 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
 
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
-    // sign and cut off first byte ('ae')
+    // console.log(privateKey.toString)
     const rawTx = transaction.transaction
-    const account = this.hmy.wallet.addByPrivateKey(privateKey);
+    const account = this.hmy.wallet.addByPrivateKey(privateKey.toString('hex'));
     const newTxn = this.hmy.transactions.newTx();
     newTxn.recover(rawTx);
     const signedTxn = await account.signTransaction(newTxn);
-  
-    return signedTxn
+    return signedTxn.rawTransaction
   }
-
 
   public async getTransactionDetails(unsignedTx: UnsignedHarmonyTransaction): Promise<IAirGapTransaction[]> {
     const transaction = unsignedTx.transaction.transaction
@@ -294,10 +293,10 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
         const query: BalanceQuery = new BalanceQuery(address)
         const { data } = await axios.post(
           `${this.options.network.rpcUrl}/`,
-          query.toJSONBody,
+          query.toJSONBody(),
           { headers: { 'Content-Type': 'application/json' } }
         )
-        balance = balance.plus(new BigNumber(data.balance))
+        balance = balance.plus(new BigNumber(data.result))
       } catch (error) {
         // if node returns 404 (which means 'no account found'), go with 0 balance
         if (error.response.status !== 404) {
@@ -371,7 +370,8 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
     try {
       const  transactions = await this.getTransactionsFromAddresses([address], 1, 0)
-      nonce = transactions[0].extra.nonce + 1
+      if(transactions.length>0)
+        nonce = transactions[0].extra.nonce + 1
     } catch (error) {
       // if node returns 404 (which means 'no account found'), go with nonce 0
       if (error.response && error.response.status !== 404) {
@@ -384,15 +384,17 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     if (balance.isLessThan(fee)) {
       throw new Error('not enough balance')
     }
-
-    const sender = new HarmonyAddress(this.getAddressFromPublicKey(publicKey)).checksum
+    let value: number = parseInt(values[0])
+    const default_gas_price = 1e-9
+    const sender = new HarmonyAddress(address).checksum
     const reciever = new HarmonyAddress(recipients[0]).checksum
-    const gasPrice = .000000001
-    const gasEstimate = 21000
+    const gasPrice = default_gas_price.toFixed(9)
+    const gasEstimate = 42000
+    value = value * 1000000
 
-    let newTx = this.hmy.transaction.newTx({
+    let newTx = this.hmy.transactions.newTx({
       to: reciever,
-      value: Unit.Szabo(values[0]).toWei(),
+      value: Unit.Szabo(value).toWei(),
       from: sender,
       shardID: 0,
       toShardID: 0,
@@ -400,10 +402,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       nonce:nonce,
       gasPrice: new Unit.One(gasPrice).toHex()
     })
-    
-    let [unsignedRawTransaction, raw] = newTx.getRLPUnsigned();
-    console.log(raw);
-    
+    let [unsignedRawTransaction] = newTx.getRLPUnsigned();
     const rlpEncodedTx = unsignedRawTransaction
 
     return {

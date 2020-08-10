@@ -1,7 +1,7 @@
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
 import 'mocha'
-// import * as sinon from 'sinon'
+import * as sinon from 'sinon'
 
 // import axios from '../../src/dependencies/src/axios-0.19.0/index'
 // import BigNumber from '../../src/dependencies/src/bignumber.js-9.0.0/bignumber'
@@ -80,25 +80,93 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
         const txList = await protocol.lib.getTransactionsFromAddresses(
             ["one15u5kn5k26tl7vla334m0w72ghjxkzddgw7mtuk"]
         )
-
-        console.log(txList)
     })
-    // itIf(!protocol.lib.supportsHD, 'prepareTransactionFromPublicKey - Is able to prepare a tx using its public key', async () => {
-    //     const preparedTx = await protocol.lib.prepareTransactionFromPublicKey(
-    //         protocol.wallet.publicKey,
-    //         protocol.txs[0].to,
-    //         [protocol.txs[0].amount],
-    //         protocol.txs[0].fee
-    //     )
+    itIf(!protocol.lib.supportsHD, 'prepareTransactionFromPublicKey - Is able to prepare a tx using its public key', async () => {
+        const preparedTx = await protocol.lib.prepareTransactionFromPublicKey(
+            protocol.wallet.publicKey,
+            protocol.txs[0].to,
+            [protocol.txs[0].amount],
+            protocol.txs[0].fee
+        )
 
-    //     protocol.txs.forEach((tx) => {
-    //         // if (tx.properties) {
-    //         //     tx.properties.forEach((property) => {
-    //         //         expect(preparedTx).to.have.property(property)
-    //         //     })
-    //         // }
-    //         expect(preparedTx).to.deep.include(tx.unsignedTx)
-    //     })
-    // })
+        protocol.txs.forEach((tx) => {
+            // if (tx.properties) {
+            //     tx.properties.forEach((property) => {
+            //         expect(preparedTx).to.have.property(property)
+            //     })
+            // }
+            expect(preparedTx.transaction).to.deep.include(tx.unsignedTx.transaction)
+        })
+    })
 
+    itIf(
+        protocol.lib.supportsHD,
+        'prepareTransactionFromExtendedPublicKey - Is able to prepare a tx using its extended public key',
+        async () => {
+            const preparedTx = await protocol.lib.prepareTransactionFromExtendedPublicKey(
+                protocol.wallet.publicKey,
+                0,
+                protocol.txs[0].to,
+                [protocol.txs[0].amount],
+                protocol.txs[0].fee
+            )
+
+            protocol.txs.forEach((tx) => {
+                // if (tx.properties) {
+                //     tx.properties.forEach((property) => {
+                //         expect(preparedTx).to.have.property(property)
+                //     })
+                // }
+                expect(preparedTx).to.deep.include(tx.unsignedTx)
+            })
+        }
+    )
+    
+    itIf(!protocol.lib.supportsHD, 'prepareTransactionFromPublicKey - Is able to prepare a transaction with amount 0', async () => {
+        // should not throw an exception when trying to create a 0 TX, given enough funds are available for the gas
+        try {
+            await protocol.lib.prepareTransactionFromPublicKey(protocol.wallet.publicKey, protocol.txs[0].to, ['0'], protocol.txs[0].fee)
+        } catch (error) {
+            throw error
+        }
+
+        // restore stubs
+        sinon.restore()
+        protocol.stub.noBalanceStub(protocol, protocol.lib)
+
+        try {
+            await protocol.lib.prepareTransactionFromPublicKey(protocol.wallet.publicKey, protocol.txs[0].to, ['0'], protocol.txs[0].fee)
+            throw new Error(`should have failed`)
+        } catch (error) {
+            expect(error.toString()).to.contain('balance')
+        }
+    })
+
+    itIf(!protocol.lib.supportsHD, 'signWithPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
+        const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+        const txs: any[] = []
+
+        for (const { unsignedTx } of protocol.txs) {
+            const tx = await protocol.lib.signWithPrivateKey(privateKey, unsignedTx)
+            txs.push(tx)
+        }
+
+        txs.forEach((tx, index) => {
+            expect(tx).to.deep.equal(protocol.txs[index].signedTx)
+        })
+    })
+
+    itIf(protocol.lib.supportsHD, 'signWithExtendedPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
+        const privateKey = await protocol.lib.getExtendedPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+        const txs: any[] = []
+
+        for (const { unsignedTx } of protocol.txs) {
+            const tx = await protocol.lib.signWithExtendedPrivateKey(privateKey, unsignedTx)
+            txs.push(tx)
+        }
+
+        txs.forEach((tx, index) => {
+            expect(tx).to.equal(protocol.txs[index].signedTx)
+        })
+    })
 })
