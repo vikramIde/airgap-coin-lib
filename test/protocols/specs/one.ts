@@ -198,7 +198,7 @@ export class ONETestProtocolSpec extends TestProtocolSpec {
     {
       message: 'example message',
       signature:
-        '8f1c4ab15b7e26a602e711fe58d55636423790ffbeb50bfbd48d9277ddac918d9941f731c0b537d8c126686a64a93c54b32001158951e981de33b7431798860b'
+        '0x85ebbdfb629caac089ee00eb7bda1689fbd5d1ecb7a0d01327a3fae46509b2a60f83594a2cfcaad48c45e733a5c944e479d0eb0509b444b6be139a3edb4b5326'
     }
   ]
 }

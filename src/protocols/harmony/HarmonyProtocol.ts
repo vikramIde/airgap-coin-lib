@@ -459,7 +459,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   //   return Buffer.from(padStart(hexString, hexString.length % 2 === 0 ? hexString.length : hexString.length + 1, '0'), 'hex')
   // }
 
-  public async signMessage(message: string, keypair: { privateKey: Buffer }): Promise<string> {
+  public async signMessage(message: string, keypair: { publicKey: string, privateKey: Buffer }): Promise<string> {
     return new HarmonyCryptoClient().signMessage(message, keypair)
   }
 

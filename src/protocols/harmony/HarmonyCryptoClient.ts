@@ -7,7 +7,7 @@ export class HarmonyCryptoClient extends CryptoClient {
     super()
   }
 
-  public async signMessage(message: string, keypair: { privateKey: Buffer }): Promise<string> {
+  public async signMessage(message: string, keypair: { publicKey: string, privateKey: Buffer }): Promise<string> {
     const sha256Hash: string = sha('sha256').update(Buffer.from(message)).digest()
     const hash: Buffer = Buffer.from(sha256Hash)
     const signed: { signature: Buffer } = SECP256K1.sign(hash, keypair.privateKey)

@@ -232,4 +232,78 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
             expect(airgapTx.transactionDetails, 'extras should exist').to.not.be.undefined
         }
     })
+
+    it('should match all valid addresses', async () => {
+        for (const address of protocol.validAddresses) {
+            const match = address.match(protocol.lib.addressValidationPattern)
+
+            expect(match && match.length > 0, `address: ${address}`).to.be.true
+        }
+    })
+
+    it('getTransactionStatus - Is able to get transaction status', async () => {
+        for (const test of protocol.transactionStatusTests) {
+            const statuses: string[] = await protocol.lib.getTransactionStatuses(test.hashes)
+
+            expect(statuses, 'transactionStatus').to.deep.equal(test.expectedResults)
+        }
+    })
+
+    itIf(
+        protocol.messages.length > 0 && protocol.lib.identifier !== 'kusama',
+        'signMessage - Is able to sign a message using a PrivateKey',
+        async () => {
+            const publicKey = await protocol.lib.getPublicKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+            const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+
+            for (const messageObject of protocol.messages) {
+                try {
+                    const signature = await protocol.lib.signMessage(messageObject.message, {
+                        publicKey,
+                        privateKey
+                    })
+                    expect(signature).to.equal(messageObject.signature)
+                } catch (e) {
+                    expect(e.message).to.equal('Method not implemented.')
+                }
+            }
+        }
+    )
+
+    itIf(protocol.messages.length > 0, 'verifyMessage - Is able to verify a message using a PublicKey', async () => {
+        const publicKey = await protocol.lib.getPublicKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+
+        for (const messageObject of protocol.messages) {
+            try {
+                const signatureIsValid = await protocol.lib.verifyMessage(messageObject.message, messageObject.signature, publicKey)
+
+                expect(signatureIsValid).to.be.true
+            } catch (e) {
+                expect(e.message).to.equal('Method not implemented.')
+            }
+        }
+    })
+
+    itIf(protocol.messages.length > 0, 'signMessage and verifyMessage - Is able to sign and verify a message', async () => {
+        const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+        const publicKey = await protocol.lib.getPublicKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+
+        for (const messageObject of protocol.messages) {
+            try {
+                const signature = await protocol.lib.signMessage(messageObject.message, {
+                    publicKey,
+                    privateKey
+                })
+                const signatureIsValid = await protocol.lib.verifyMessage(messageObject.message, signature, publicKey)
+
+                expect(signatureIsValid, 'first signature is invalid').to.be.true
+
+                const signature2IsValid = await protocol.lib.verifyMessage(`different-message-${messageObject.message}`, signature, publicKey)
+                expect(signature2IsValid, 'second signature is invalid').to.be.false
+            } catch (e) {
+                expect(e.message).to.equal('Method not implemented.')
+            }
+        }
+    })
+
 })
