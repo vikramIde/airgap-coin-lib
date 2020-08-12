@@ -29,6 +29,8 @@ const getProtocolOptionsByIdentifier: (identifier: ProtocolSymbols, network?: Pr
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
     case MainProtocolSymbols.ONE:
       return new HarmonyProtocolOptions(network ? (network as HarmonyProtocolNetwork) : new HarmonyProtocolNetwork())
+    case SubProtocolSymbols.ONE_HRC20:
+      return new HarmonyProtocolOptions(network ? (network as HarmonyProtocolNetwork) : new HarmonyProtocolNetwork())
     case MainProtocolSymbols.BTC:
       return new BitcoinProtocolOptions(network ? (network as BitcoinProtocolNetwork) : new BitcoinProtocolNetwork())
     case MainProtocolSymbols.ETH:

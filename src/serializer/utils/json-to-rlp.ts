@@ -50,6 +50,7 @@ function getTypeFromSchemaDefinition(schema: SchemaItem | undefined): SchemaType
 }
 
 export function jsonToArray(key: string, schema: SchemaItem, value: Object): RLPData {
+
   const type: SchemaTypes = getTypeFromSchemaDefinition(schema)
   switch (type) {
     case SchemaTypes.STRING:

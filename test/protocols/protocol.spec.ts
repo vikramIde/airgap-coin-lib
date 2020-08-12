@@ -7,7 +7,7 @@ import { IAirGapTransaction, SubstrateProtocol } from '../../src'
 
 import { TestProtocolSpec } from './implementations'
 import { AETestProtocolSpec } from './specs/ae'
-// import { ONETestProtocolSpec } from './specs/one'
+import { ONETestProtocolSpec } from './specs/one'
 import { BitcoinProtocolSpec } from './specs/bitcoin'
 import { BitcoinTestProtocolSpec } from './specs/bitcoin-test'
 import { CosmosTestProtocolSpec } from './specs/cosmos'
@@ -42,7 +42,7 @@ const protocols = [
   new EthereumClassicTestProtocolSpec(),
   new EthereumRopstenTestProtocolSpec(),
   new AETestProtocolSpec(),
-  // new ONETestProtocolSpec(),
+  new ONETestProtocolSpec(),
   new TezosTestProtocolSpec(),
   new BitcoinProtocolSpec(),
   new BitcoinTestProtocolSpec(),
