@@ -326,8 +326,9 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
         )
         balance = balance.plus(new BigNumber(data.result))
       } catch (error) {
+        // console.log(error)
         // if node returns 404 (which means 'no account found'), go with 0 balance
-        if (error.response.status !== 404) {
+        if (error.code == 'ENOTFOUND') {
           throw error
         }
       }
@@ -442,15 +443,26 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   
 
   public async broadcastTransaction(rawTransaction: string): Promise<string> {
-    const query: SendQuery = new SendQuery(rawTransaction)
+    let res:string = ''
+    try {
+      const query: SendQuery = new SendQuery(rawTransaction)
+      const { data } = await axios.post(
+        `${this.options.network.rpcUrl}/`,
+        query.toJSONBody(),
+        { headers: { 'Content-Type': 'application/json' } }
+      )
 
-    const { data } = await axios.post(
-      `${this.options.network.rpcUrl}/`,
-      query.toJSONBody,
-      { headers: { 'Content-Type': 'application/json' } }
-    )
+      res = data.result
+    } catch (error) {
+      console.log(error)
+      // if node returns 404 (which means 'no account found'), go with 0 balance
+      if (error.code == 'ENOTFOUND') {
+        throw error
+      }
+    }
+  
+    return res
 
-    return data.tx_hash
   }
 
   // private toHexBuffer(value: number | BigNumber): Buffer {

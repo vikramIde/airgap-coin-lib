@@ -8,13 +8,13 @@
 // // import { RawHarmonyTransaction } from '../../src/serializer/types'
 // // import { IAirGapTransaction } from '../../src'
 
-// // import { ONETestProtocolSpec } from './specs/one'
+// import { ONETestProtocolSpec } from './specs/one'
 
 // // use chai-as-promised plugin
 // chai.use(chaiAsPromised)
-// // const expect = chai.expect
+// const expect = chai.expect
 
-// // const protocol = new ONETestProtocolSpec()
+// const protocol = new ONETestProtocolSpec()
 // // const lib = protocol.lib
 // // const itIf = (condition, title, test) => {
 // //     return condition ? it(title, test) : it.skip(title, test)
@@ -22,10 +22,14 @@
 // describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
 //     console.log('Harmony Custom Test Start')
     
-//     // it('should getPublicKeyFromMnemonic - should be able to create a public key from a corresponding mnemonic', async () => {
-//     //     const publicKey = await protocol.lib.getPublicKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
-//     //     expect(publicKey).to.equal(protocol.wallet.publicKey)
-//     // })
+//     it('broadcastTransaction - should be able to broadcast a transaction', async () => {
+//         const publicKey = await protocol.lib.broadcastTransaction(protocol.txs[0].signedTx)
+//         expect(publicKey).to.equal(protocol.wallet.publicKey)
+//     })
+//     it('getBalanceOfAddresses - should be able to get the balance from adddress', async () => {
+//         const balance = await protocol.lib.getBalanceOfAddresses(protocol.wallet.addresses)
+//         console.log(balance)
+//     })
 
 //     // itIf(!protocol.lib.supportsHD, 'getPrivateKeyFromMnemonic - should be able to create a private key from a mnemonic', async () => {
 //     //     const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
