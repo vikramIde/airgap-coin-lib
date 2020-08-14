@@ -1,44 +1,60 @@
+import { SubstrateTransactionCursor } from './../../SubstrateTypes'
 import axios from '../../../../dependencies/src/axios-0.19.0'
-import { IAirGapTransaction } from '../../../../interfaces/IAirGapTransaction'
+import BigNumber from '../../../../dependencies/src/bignumber.js-9.0.0/bignumber'
+import { IAirGapTransaction, AirGapTransactionStatus } from '../../../../interfaces/IAirGapTransaction'
 import { SubstrateNetwork } from '../../SubstrateNetwork'
-import { SubstrateAddress } from '../data/account/SubstrateAddress'
 
 export class SubstrateBlockExplorerClient {
-  constructor(readonly network: SubstrateNetwork, readonly apiUrl: string) {}
+  constructor(readonly network: SubstrateNetwork, readonly apiUrl: string) { }
 
-  public async getTransactions(address: string, size: number, pageNumber: number): Promise<Partial<IAirGapTransaction[]>> {
-    const response = await axios.get(
-      `${this.apiUrl}/balances/transfer?&filter[address]=${address}&page[size]=${size}&page[number]=${pageNumber}`
-    )
+  public async getTransactions(address: string, limit: number, protocolDecimals: number, cursor?: SubstrateTransactionCursor): Promise<IAirGapTransaction[]> {
+    const body = cursor ? { row: limit, page: cursor.page - 1, address: address } : { row: limit, page: 0, address: address }
+    const responses = await Promise.all([
+      axios.post(`${this.apiUrl}/transfers`, body),
+      axios.post(`${this.apiUrl}/account/reward_slash`, body)
+    ])
 
-    return response.data.data
-      .filter(
-        (transfer) =>
-          transfer.type === 'balancetransfer' &&
-          (transfer.attributes.event_id.toLowerCase() === 'transfer' || transfer.attributes.event_id.toLowerCase() === 'reward')
-      )
-      .map((transfer) => {
-        const attributes = transfer.attributes
+    const transfers = responses[0].data.data?.transfers
+    const rewardSlash = responses[1].data.data?.list
 
-        const from =
-          attributes.sender?.id !== undefined
-            ? SubstrateAddress.fromPublicKey(attributes.sender.id, this.network).toString()
-            : attributes.sender.name
+    const airGapTransfers: IAirGapTransaction[] = transfers
+      ? transfers
+        .filter((tx) => tx.module === 'balances')
+        .map((tx) => {
+          return {
+            from: [tx.from],
+            to: [tx.to],
+            isInbound: address.includes(tx.to),
+            amount: new BigNumber(tx.amount).shiftedBy(protocolDecimals).toFixed(),
+            timestamp: tx.block_timestamp,
+            fee: tx.fee,
+            hash: tx.hash,
+            blockHeight: tx.block_num,
+            status: tx.success !== undefined
+              ? tx.success ? AirGapTransactionStatus.APPLIED : AirGapTransactionStatus.FAILED
+              : undefined
+          }
+        })
+      : []
 
-        const destination =
-          attributes.destination?.id !== undefined && attributes.destination?.type === 'account'
-            ? SubstrateAddress.fromPublicKey(attributes.destination.id, this.network).toString()
-            : address
+    const airGapPayouts: IAirGapTransaction[] = rewardSlash
+      ? rewardSlash
+        .filter((tx) => tx.event_id === 'Reward')
+        .map((tx) => {
+          return {
+            from: ['Staking Reward'],
+            to: [address],
+            amount: tx.amount,
+            isInbound: true,
+            timestamp: tx.block_timestamp,
+            fee: '0',
+            hash: tx.extrinsic_hash,
+            blockHeight: tx.block_num,
+            status: AirGapTransactionStatus.APPLIED
+          }
+        })
+      : []
 
-        return {
-          from: [from],
-          to: [destination],
-          isInbound: address.includes(destination),
-          amount: transfer.attributes.value,
-          fee: transfer.attributes.fee,
-          hash: transfer.id,
-          blockHeight: transfer.attributes.block_id
-        }
-      })
+    return airGapTransfers.concat(airGapPayouts)
   }
 }

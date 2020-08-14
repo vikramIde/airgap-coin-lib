@@ -11,7 +11,7 @@ COPY package.json /app
 COPY package-lock.json /app
 
 # install dependencies
-RUN npm install
+RUN npm ci
 
 # Bundle app source
 COPY . /app
@@ -24,5 +24,9 @@ RUN export NODE_ENV=production
 
 # build
 RUN npm run build
+
+# browserify
+RUN npm i -D browserify
+RUN npm run browserify
 
 CMD ["npm", "run", "test"]
