@@ -6,17 +6,28 @@ import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
 const { Harmony } = require('@harmony-js/core');
-import { 
-  bip39, 
+const {
+  bip39,
   // hdkey,
   // EncryptOptions, 
-  getAddress, 
+  getAddress,
   // getAddressFromPublicKey,
   // generatePrivateKey,
   // getPubkeyFromPrivateKey,
   // getAddressFromPrivateKey
   HarmonyAddress
- } from '@harmony-js/crypto';
+} = require("@harmony-js/crypto")
+// import { 
+//   bip39, 
+//   // hdkey,
+//   // EncryptOptions, 
+//   getAddress, 
+//   // getAddressFromPublicKey,
+//   // generatePrivateKey,
+//   // getPubkeyFromPrivateKey,
+//   // getAddressFromPrivateKey
+//   HarmonyAddress
+//  } from '@harmony-js/crypto';
 
 const { ChainID, ChainType, Unit } = require('@harmony-js/utils');
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
