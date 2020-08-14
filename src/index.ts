@@ -6,6 +6,7 @@ import { ProtocolNotSupported, ProtocolVersionMismatch, SerializerVersionMismatc
 import { IAirGapTransaction } from './interfaces/IAirGapTransaction'
 import { IAirGapWallet } from './interfaces/IAirGapWallet'
 import { AeternityProtocol } from './protocols/aeternity/AeternityProtocol'
+import { HarmonyProtocol } from './protocols/harmony/HarmonyProtocol'
 import { BitcoinProtocol } from './protocols/bitcoin/BitcoinProtocol'
 import { BitcoinTestnetProtocol } from './protocols/bitcoin/BitcoinTestnetProtocol'
 import { CosmosProtocol } from './protocols/cosmos/CosmosProtocol'
@@ -59,7 +60,9 @@ import { addSupportedProtocol, supportedProtocols } from './utils/supportedProto
 import { AirGapMarketWallet } from './wallet/AirGapMarketWallet'
 import { AirGapWallet } from './wallet/AirGapWallet'
 import { AeternityProtocolOptions, AeternalBlockExplorer, AeternityProtocolNetwork } from './protocols/aeternity/AeternityProtocolOptions'
+import { HarmonyProtocolOptions, HarmonyBlockExplorer, HarmonyProtocolNetwork } from './protocols/harmony/HarmonyProtocolOptions'
 import { AeternityCryptoClient } from './protocols/aeternity/AeternityCryptoClient'
+import { HarmonyCryptoClient } from './protocols/harmony/HarmonyCryptoClient'
 import { BitcoinBlockbookProtocol } from './protocols/bitcoin/BitcoinBlockbookProtocol'
 import { BitcoinCryptoClient } from './protocols/bitcoin/BitcoinCryptoClient'
 import {
@@ -157,6 +160,9 @@ export {
 
 // Aeternity
 export { AeternityProtocol, AeternityCryptoClient, AeternityProtocolOptions, AeternalBlockExplorer, AeternityProtocolNetwork }
+
+//Harmony
+export { HarmonyProtocol, HarmonyCryptoClient,  HarmonyProtocolOptions, HarmonyBlockExplorer, HarmonyProtocolNetwork }
 
 // Bitcoin
 export {
