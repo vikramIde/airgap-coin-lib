@@ -42,6 +42,7 @@
   },
   "author": "Papers GmbH <contact@papers.ch> (https://papers.ch)",
   "dependencies": {
+    "@harmony-js/core": "^0.1.50",
     "@polkadot/util": "2.0.1",
     "@polkadot/wasm-crypto": "0.20.1",
     "@taquito/local-forging": "6.1.1-beta.0",
