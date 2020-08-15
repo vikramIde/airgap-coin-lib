@@ -8,6 +8,7 @@ import BigNumber from '../../src/dependencies/src/bignumber.js-9.0.0/bignumber'
 import {
   addSupportedProtocol,
   AeternityProtocol,
+  HarmonyProtocol,
   AirGapMarketWallet,
   BitcoinProtocol,
   CosmosProtocol,
@@ -22,6 +23,7 @@ import { MarketDataSample } from '../../dist/wallet/AirGapMarketWallet'
 import { MainProtocolSymbols } from '../../dist/utils/ProtocolSymbols'
 
 addSupportedProtocol(new AeternityProtocol())
+addSupportedProtocol(new HarmonyProtocol())
 addSupportedProtocol(new BitcoinProtocol())
 addSupportedProtocol(new EthereumProtocol())
 addSupportedProtocol(new GroestlcoinProtocol())
