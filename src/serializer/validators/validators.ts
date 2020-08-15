@@ -293,6 +293,26 @@ validators.isValidAeternityTx = (transaction: unknown) => {
   }
 }
 
+validators.isValidHarmonyTx = (transaction: unknown) => {
+  // allow empty values by default (needs to be checked by "presence" check)
+  if (transaction === null || typeof transaction === 'undefined') {
+    return null
+  }
+
+  if (typeof transaction === 'string' && !transaction.startsWith('0x')) {
+    return 'invalid tx format'
+  } else if (typeof transaction === 'string') {
+    try {
+      bs64check.decode(transaction.replace('tx_', ''))
+
+      return null
+    } catch (error) {
+      return "isn't base64 encoded"
+    }
+  } else {
+    return "isn't a string"
+  }
+}
 validators.isValidAeternityAccount = (accountIdentifier: string) => {
   return new Promise(async (resolve) => {
     if (accountIdentifier === null || typeof accountIdentifier === 'undefined') {

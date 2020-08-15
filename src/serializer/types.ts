@@ -41,6 +41,11 @@ export interface RawAeternityTransaction {
   transaction: string
 }
 
+export interface RawHarmonyTransaction {
+  networkId: string
+  transaction: string
+}
+
 export interface UnsignedCosmosTransaction extends UnsignedTransaction {
   transaction: CosmosTransaction
 }

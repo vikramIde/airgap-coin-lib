@@ -10,6 +10,7 @@ import { UnsignedTransaction } from './schemas/definitions/transaction-sign-requ
 import { SerializableUnsignedCosmosTransaction } from './schemas/definitions/transaction-sign-request-cosmos'
 import { SchemaInfo, SchemaRoot } from './schemas/schema'
 import { AeternityTransactionValidator } from './unsigned-transactions/aeternity-transactions.validator'
+import { HarmonyTransactionValidator } from './unsigned-transactions/harmony-transactions.validator'
 import { BitcoinTransactionValidator } from './unsigned-transactions/bitcoin-transactions.validator'
 import { CosmosTransactionValidator } from './unsigned-transactions/cosmos-transactions.validator'
 import { EthereumTransactionValidator } from './unsigned-transactions/ethereum-transactions.validator'
@@ -24,6 +25,7 @@ const messageSignRequest: SchemaRoot = require('./schemas/generated/message-sign
 const messageSignResponse: SchemaRoot = require('./schemas/generated/message-sign-response.json')
 
 const unsignedTransactionAeternity: SchemaRoot = require('./schemas/generated/transaction-sign-request-aeternity.json')
+const unsignedTransactionHarmony: SchemaRoot = require('./schemas/generated/transaction-sign-request-harmony.json')
 const unsignedTransactionBitcoin: SchemaRoot = require('./schemas/generated/transaction-sign-request-bitcoin.json')
 const unsignedTransactionCosmos: SchemaRoot = require('./schemas/generated/transaction-sign-request-cosmos.json')
 const unsignedTransactionEthereum: SchemaRoot = require('./schemas/generated/transaction-sign-request-ethereum.json')
@@ -31,6 +33,7 @@ const unsignedTransactionTezos: SchemaRoot = require('./schemas/generated/transa
 const unsignedTransactionSubstrate: SchemaRoot = require('./schemas/generated/transaction-sign-request-substrate.json')
 
 const signedTransactionAeternity: SchemaRoot = require('./schemas/generated/transaction-sign-response-aeternity.json')
+const signedTransactionHarmony: SchemaRoot = require('./schemas/generated/transaction-sign-response-harmony.json')
 const signedTransactionBitcoin: SchemaRoot = require('./schemas/generated/transaction-sign-response-bitcoin.json')
 const signedTransactionCosmos: SchemaRoot = require('./schemas/generated/transaction-sign-response-cosmos.json')
 const signedTransactionEthereum: SchemaRoot = require('./schemas/generated/transaction-sign-response-ethereum.json')
@@ -118,6 +121,7 @@ export class Serializer {
       btc: BitcoinTransactionValidator,
       grs: BitcoinTransactionValidator,
       ae: AeternityTransactionValidator,
+      one: HarmonyTransactionValidator,
       xtz: TezosTransactionValidator,
       cosmos: CosmosTransactionValidator,
       polkadot: SubstrateTransactionValidator,
@@ -147,6 +151,7 @@ Serializer.addSchema(IACMessageType.MessageSignResponse.toString(), { schema: me
 
 // TODO: Make sure that we have a schema for every protocol we support
 Serializer.addSchema(IACMessageType.TransactionSignRequest.toString(), { schema: unsignedTransactionAeternity }, MainProtocolSymbols.AE)
+Serializer.addSchema(IACMessageType.TransactionSignRequest.toString(), { schema: unsignedTransactionHarmony }, MainProtocolSymbols.ONE)
 Serializer.addSchema(IACMessageType.TransactionSignRequest.toString(), { schema: unsignedTransactionBitcoin }, MainProtocolSymbols.BTC)
 Serializer.addSchema(IACMessageType.TransactionSignRequest.toString(), { schema: unsignedTransactionBitcoin }, MainProtocolSymbols.GRS)
 Serializer.addSchema(
@@ -170,11 +175,13 @@ Serializer.addSchema(
 Serializer.addSchema(IACMessageType.TransactionSignRequest.toString(), { schema: unsignedTransactionSubstrate }, MainProtocolSymbols.KUSAMA)
 
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionAeternity }, MainProtocolSymbols.AE)
+Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionHarmony }, MainProtocolSymbols.ONE)
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionBitcoin }, MainProtocolSymbols.BTC)
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionBitcoin }, MainProtocolSymbols.GRS)
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionCosmos }, MainProtocolSymbols.COSMOS)
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionEthereum }, MainProtocolSymbols.ETH)
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionEthereum }, SubProtocolSymbols.ETH_ERC20)
+Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionHarmony }, SubProtocolSymbols.ONE_HRC20)
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionTezos }, MainProtocolSymbols.XTZ)
 Serializer.addSchema(IACMessageType.TransactionSignResponse.toString(), { schema: signedTransactionTezos }, SubProtocolSymbols.XTZ_BTC)
 Serializer.addSchema(

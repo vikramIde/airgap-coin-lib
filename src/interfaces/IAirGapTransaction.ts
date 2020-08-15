@@ -6,6 +6,7 @@ import { ProtocolNetwork } from '../utils/ProtocolNetwork'
 import { ProtocolSymbols } from '../utils/ProtocolSymbols'
 import { EthereumTransactionCursor } from '../protocols/ethereum/EthereumTypes'
 import { AeternityTransactionCursor } from '../protocols/aeternity/AeternityTypes'
+import { HarmonyTransactionCursor } from '../protocols/harmony/HarmonyTypes'
 
 export enum AirGapTransactionType {
   SPEND = 'Spend Transaction',
@@ -45,6 +46,7 @@ export type IProtocolTransactionCursor =
   | BitcoinTransactionCursor
   | TezosTransactionCursor
   | AeternityTransactionCursor
+  | HarmonyTransactionCursor
   | SubstrateTransactionCursor
   | CosmosTransactionCursor
   | BitcoinBlockbookTransactionCursor

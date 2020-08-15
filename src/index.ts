@@ -6,6 +6,7 @@ import { ProtocolNotSupported, ProtocolVersionMismatch, SerializerVersionMismatc
 import { IAirGapTransaction } from './interfaces/IAirGapTransaction'
 import { IAirGapWallet } from './interfaces/IAirGapWallet'
 import { AeternityProtocol } from './protocols/aeternity/AeternityProtocol'
+import { HarmonyProtocol } from './protocols/harmony/HarmonyProtocol'
 import { BitcoinProtocol } from './protocols/bitcoin/BitcoinProtocol'
 import { BitcoinTestnetProtocol } from './protocols/bitcoin/BitcoinTestnetProtocol'
 import { CosmosProtocol } from './protocols/cosmos/CosmosProtocol'
@@ -41,11 +42,13 @@ import { MessageSignRequest } from './serializer/schemas/definitions/message-sig
 import { MessageSignResponse } from './serializer/schemas/definitions/message-sign-response'
 import { UnsignedTransaction } from './serializer/schemas/definitions/transaction-sign-request'
 import { UnsignedAeternityTransaction } from './serializer/schemas/definitions/transaction-sign-request-aeternity'
+import { UnsignedHarmonyTransaction } from './serializer/schemas/definitions/transaction-sign-request-harmony'
 import { UnsignedBitcoinTransaction } from './serializer/schemas/definitions/transaction-sign-request-bitcoin'
 import { UnsignedEthereumTransaction } from './serializer/schemas/definitions/transaction-sign-request-ethereum'
 import { UnsignedTezosTransaction } from './serializer/schemas/definitions/transaction-sign-request-tezos'
 import { SignedTransaction } from './serializer/schemas/definitions/transaction-sign-response'
 import { SignedAeternityTransaction } from './serializer/schemas/definitions/transaction-sign-response-aeternity'
+import { SignedHarmonyTransaction } from './serializer/schemas/definitions/transaction-sign-response-harmony'
 import { SignedBitcoinTransaction } from './serializer/schemas/definitions/transaction-sign-response-bitcoin'
 import { SignedCosmosTransaction } from './serializer/schemas/definitions/transaction-sign-response-cosmos'
 import { SignedEthereumTransaction } from './serializer/schemas/definitions/transaction-sign-response-ethereum'
@@ -59,7 +62,10 @@ import { addSupportedProtocol, supportedProtocols } from './utils/supportedProto
 import { AirGapMarketWallet } from './wallet/AirGapMarketWallet'
 import { AirGapWallet } from './wallet/AirGapWallet'
 import { AeternityProtocolOptions, AeternalBlockExplorer, AeternityProtocolNetwork } from './protocols/aeternity/AeternityProtocolOptions'
+import { HarmonyProtocolOptions, HarmonyBlockExplorer, HarmonyProtocolNetwork } from './protocols/harmony/HarmonyProtocolOptions'
 import { AeternityCryptoClient } from './protocols/aeternity/AeternityCryptoClient'
+import { HarmonyCryptoClient } from './protocols/harmony/HarmonyCryptoClient'
+
 import { BitcoinBlockbookProtocol } from './protocols/bitcoin/BitcoinBlockbookProtocol'
 import { BitcoinCryptoClient } from './protocols/bitcoin/BitcoinCryptoClient'
 import {
@@ -159,6 +165,9 @@ export {
 
 // Aeternity
 export { AeternityProtocol, AeternityCryptoClient, AeternityProtocolOptions, AeternalBlockExplorer, AeternityProtocolNetwork }
+
+//Harmony
+export { HarmonyProtocol, HarmonyCryptoClient, HarmonyProtocolOptions, HarmonyBlockExplorer, HarmonyProtocolNetwork }
 
 // Bitcoin
 export {
@@ -269,11 +278,13 @@ export {
   SignedTransaction,
   UnsignedTransaction,
   UnsignedAeternityTransaction,
+  UnsignedHarmonyTransaction,
   UnsignedBitcoinTransaction,
   UnsignedCosmosTransaction,
   UnsignedEthereumTransaction,
   UnsignedTezosTransaction,
   SignedAeternityTransaction,
+  SignedHarmonyTransaction,
   SignedBitcoinTransaction,
   SignedCosmosTransaction,
   SignedEthereumTransaction,
