@@ -22,12 +22,20 @@ const itIf = (condition, title, test) => {
 describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
     console.log('Harmony Custom Test Start')
     
-    it('broadcastTransaction - should be able to broadcast a transaction', async () => {
-        const publicKey = await protocol.lib.broadcastTransaction(protocol.txs[0].signedTx)
-        expect(publicKey).to.equal(protocol.wallet.publicKey)
-    })
-    it('getBalanceOfAddresses - should be able to get the balance from adddress', async () => {
-        const balance = await protocol.lib.getBalanceOfAddresses(protocol.wallet.addresses)
+    // it('broadcastTransaction - should be able to broadcast a transaction', async () => {
+    //     const publicKey = await protocol.lib.broadcastTransaction(protocol.txs[0].signedTx)
+    //     expect(publicKey).to.equal(protocol.wallet.publicKey)
+    // })
+    // it('getBalanceOfAddresses - should be able to get the balance from adddress', async () => {
+    //     const balance = await protocol.lib.getBalanceOfAddresses(protocol.wallet.addresses)
+    //     console.log(balance)
+    // })
+
+    it('estimateFeeDefaultsFromPublicKey - should be able to get the balance from adddress', async () => {
+        const balance = await protocol.lib.estimateFeeDefaultsFromPublicKey(
+            protocol.wallet.addresses[0],
+            ['one1z8f8skq9mxakkk230004dclc9v0z59grk5xgrd'],
+            ['500'])
         console.log(balance)
     })
 

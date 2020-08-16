@@ -6,7 +6,7 @@ export class EstimateGasQuery {
             {
                 "jsonrpc": "2.0",
                 "id": 1,
-                "method": "hmyv2_gasPrice",
+                "method": "hmyv2_estimateGas",
                 "params": []
             }
         )

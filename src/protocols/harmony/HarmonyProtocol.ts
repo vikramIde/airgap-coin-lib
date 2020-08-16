@@ -49,7 +49,7 @@ import { HarmonyProtocolOptions } from './HarmonyProtocolOptions'
 import { TransactionListQuery } from './Query/HarmonyTransactionListQuery'
 import { BalanceQuery } from './Query/HarmonyBalanceQuery'
 import { SendQuery } from './Query/HarmonySendQuery'
-import { EstimateGasQuery } from './Query/HarmonyEstimateGasQuery'
+// import { EstimateGasQuery } from './Query/HarmonyEstimateGasQuery'
 
 export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtocol {
   public symbol: string = 'ONE'
@@ -63,9 +63,9 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   public identifier: ProtocolSymbols = MainProtocolSymbols.ONE
 
   public feeDefaults = {
-    low: '0.000021',
-    medium: '0.000042',
-    high: '0.000084'
+    low: '0.00021',
+    medium: '0.00042',
+    high: '0.00084'
   }
 
   public units: CurrencyUnit[] = [
@@ -403,14 +403,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     values: string[],
     data?: any
   ): Promise<FeeDefaults> {
-    
-    const query: EstimateGasQuery = new EstimateGasQuery()
-    const axiosRes= await axios.post(
-      `${this.options.network.rpcUrl}/`,
-      query.toJSONBody,
-      { headers: { 'Content-Type': 'application/json' } }
-    )
-    return axiosRes.data
+    return this.feeDefaults
   }
 
   public async prepareTransactionFromPublicKey(
