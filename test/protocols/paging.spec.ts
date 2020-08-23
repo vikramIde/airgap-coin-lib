@@ -6,6 +6,7 @@ import * as sinon from 'sinon'
 
 import { TestProtocolSpec } from './implementations'
 import { AETestProtocolSpec } from './specs/ae'
+import { ONETestProtocolSpec } from './specs/one'
 import { BitcoinProtocolSpec } from './specs/bitcoin'
 import { CosmosTestProtocolSpec } from './specs/cosmos'
 import { EthereumTestProtocolSpec } from './specs/ethereum'
@@ -22,6 +23,7 @@ const protocols = [
   new CosmosTestProtocolSpec(),
   new EthereumTestProtocolSpec(),
   new AETestProtocolSpec(),
+  new ONETestProtocolSpec(),
   new TezosTestProtocolSpec(),
   new BitcoinProtocolSpec(),
   new GenericERC20TokenTestProtocolSpec(),

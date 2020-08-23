@@ -8,6 +8,9 @@ import { HarmonyTransactionResult, HarmonyTransactionCursor } from './HarmonyTyp
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
 const { Harmony } = require('@harmony-js/core');
+const { toUtf8Bytes } = require('@harmony-js/contract');
+import {  getRLPUnsigned } from "./utils";
+
 const {
   bip39,
   // hdkey,
@@ -262,12 +265,15 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
 
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
-    // console.log(privateKey.toString)
+    console.log(privateKey.toString(),'privateKey')
     const rawTx = transaction.transaction
     const account = this.hmy.wallet.addByPrivateKey(privateKey.toString('hex'));
+    console.log(account, 'account')
     const newTxn = this.hmy.transactions.newTx();
     newTxn.recover(rawTx);
+    console.log(newTxn, 'newTxn')
     const signedTxn = await account.signTransaction(newTxn);
+    console.log(signedTxn, 'signedTxn')
     return signedTxn.rawTransaction
   }
 
@@ -277,8 +283,8 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     const newTxn = this.hmy.transactions.newTx();
     let sender:string=''
     let reciever:string=''
-    let value:number =0
-    let fee:number =0
+    // let value:number =0
+    // let fee:number =0
     newTxn.recover(transaction);
     // console.log(newTxn)
 
@@ -288,25 +294,25 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     if (newTxn.to != '0x')
     reciever = this.hmy.crypto.getAddress(newTxn.to).bech32
 
-    if (newTxn.value.toString(10)) {
-      const coins = new this.hmy.utils.Unit(newTxn.value)
-        .asWei()
-        .toOne();
-      value = parseInt(coins)
+    // if (newTxn.value.toString(10)) {
+    //   const coins = new this.hmy.utils.Unit(newTxn.value)
+    //     .asWei()
+    //     .toOne();
+    //   value = parseInt(coins) * 10000
 
-    }
+    // }
 
-    if (newTxn.gasPrice.toString(10)) {
-       fee = new this.hmy.utils.Unit(newTxn.gasPrice)
-        .asWei()
-        .toOne()
-    }
+    // if (newTxn.gasPrice.toString(10)) {
+    //    fee = new this.hmy.utils.Unit(newTxn.gasPrice)
+    //     .asWei()
+    //     .toOne()
+    // }
 
     // let coins = new BigNumber(Number('0x' + newTxn.value.toString('hex'))).div(1e12).toNumber()
 
     const newAirgapTx: IAirGapTransaction = {
-        amount: value.toString(),
-        fee: fee.toString(),
+        amount: newTxn.value,
+        fee: newTxn.gasPrice,
         from: [sender],
         isInbound: false,
         protocolIdentifier: this.identifier,
@@ -413,9 +419,18 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     fee: string,
     payload?: string
   ): Promise<RawHarmonyTransaction> {
+    if (recipients.length !== values.length) {
+      return Promise.reject('recipients length does not match with values')
+    }
+
+    if (recipients.length !== 1) {
+      return Promise.reject('you cannot have 0 recipients')
+    }
+
     let nonce = 1
 
     const address: string = await this.getAddressFromPublicKey(publicKey)
+    
 
     try {
       
@@ -434,25 +449,31 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     if (balance.isLessThan(fee)) {
       throw new Error('not enough balance')
     }
-    let value: number = parseInt(values[0])
+    const coins = Unit.Szabo(values[0]).asWei().toOne()
     const default_gas_price = 1e-9
     const sender = new HarmonyAddress(address).checksum
     const reciever = new HarmonyAddress(recipients[0]).checksum
     const gasPrice = default_gas_price.toFixed(9)
     const gasEstimate = 42000
-    value = value * 1000000
+    let value = coins * 1000000
 
-    let newTx = this.hmy.transactions.newTx({
+    if (!payload) {
+      payload = '0x'
+    }
+    const txn = {
+      from: sender,
       to: reciever,
       value: Unit.Szabo(value).toWei(),
-      from: sender,
       shardID: 0,
       toShardID: 0,
+      chainId: 2,
       gasLimit: gasEstimate,
-      nonce:nonce,
-      gasPrice: new Unit.One(gasPrice).toHex()
-    })
-    let [unsignedRawTransaction] = newTx.getRLPUnsigned();
+      nonce: 3,
+      data: toUtf8Bytes(payload),
+      gasPrice: Unit.One(gasPrice).toHex()
+    }
+
+    let [unsignedRawTransaction] = getRLPUnsigned(txn)
     const rlpEncodedTx = unsignedRawTransaction
 
     return {
@@ -460,8 +481,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       networkId: this.defaultNetworkId
     }
   }
-
-  
 
   public async broadcastTransaction(rawTransaction: string): Promise<string> {
     let res:string = ''

@@ -31,29 +31,29 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
     //     console.log(balance)
     // })
 
-    it('estimateFeeDefaultsFromPublicKey - should be able to get the balance from adddress', async () => {
-        const balance = await protocol.lib.estimateFeeDefaultsFromPublicKey(
-            protocol.wallet.addresses[0],
-            ['one1z8f8skq9mxakkk230004dclc9v0z59grk5xgrd'],
-            ['500'])
-        console.log(balance)
-    })
+    // it('estimateFeeDefaultsFromPublicKey - should be able to get the balance from adddress', async () => {
+    //     const balance = await protocol.lib.estimateFeeDefaultsFromPublicKey(
+    //         protocol.wallet.addresses[0],
+    //         ['one1z8f8skq9mxakkk230004dclc9v0z59grk5xgrd'],
+    //         ['500'])
+    //     console.log(balance)
+    // })
 
-    itIf(!protocol.lib.supportsHD, 'signWithPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
-        const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
-        const txs: any[] = []
+    // itIf(!protocol.lib.supportsHD, 'signWithPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
+    //     const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+    //     const txs: any[] = []
 
-        for (const { unsignedTx } of protocol.txs) {
-            const tx = await protocol.lib.signWithPrivateKey(privateKey, unsignedTx)
-            txs.push(tx)
-        }
+    //     for (const { unsignedTx } of protocol.txs) {
+    //         const tx = await protocol.lib.signWithPrivateKey(privateKey, unsignedTx)
+    //         txs.push(tx)
+    //     }
 
-        txs.forEach((tx, index) => {
-            console.log(tx,'tx')
-            console.log(protocol.txs[index],'protocol.txs[index]')
-            expect(tx).to.deep.equal(protocol.txs[index].signedTx)
-        })
-    })
+    //     txs.forEach((tx, index) => {
+    //         console.log(tx,'tx')
+    //         console.log(protocol.txs[index],'protocol.txs[index]')
+    //         expect(tx).to.deep.equal(protocol.txs[index].signedTx)
+    //     })
+    // })
 
     // itIf(!protocol.lib.supportsHD, 'getPrivateKeyFromMnemonic - should be able to create a private key from a mnemonic', async () => {
     //     const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
@@ -110,23 +110,24 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
     //         ["one15u5kn5k26tl7vla334m0w72ghjxkzddgw7mtuk"]
     //     )
     // })
-    // itIf(!protocol.lib.supportsHD, 'prepareTransactionFromPublicKey - Is able to prepare a tx using its public key', async () => {
-    //     const preparedTx = await protocol.lib.prepareTransactionFromPublicKey(
-    //         protocol.wallet.publicKey,
-    //         protocol.txs[0].to,
-    //         [protocol.txs[0].amount],
-    //         protocol.txs[0].fee
-    //     )
-
-    //     protocol.txs.forEach((tx) => {
-    //         // if (tx.properties) {
-    //         //     tx.properties.forEach((property) => {
-    //         //         expect(preparedTx).to.have.property(property)
-    //         //     })
-    //         // }
-    //         expect(preparedTx.transaction).to.deep.include(tx.unsignedTx.transaction)
-    //     })
-    // })
+    itIf(!protocol.lib.supportsHD, 'prepareTransactionFromPublicKey - Is able to prepare a tx using its public key', async () => {
+        
+        const preparedTx = await protocol.lib.prepareTransactionFromPublicKey(
+            protocol.wallet.publicKey,
+            protocol.txs[0].to,
+            [protocol.txs[0].amount],
+            protocol.txs[0].fee
+        )
+        console.log(preparedTx.transaction)
+        protocol.txs.forEach((tx) => {
+            // if (tx.properties) {
+            //     tx.properties.forEach((property) => {
+            //         expect(preparedTx).to.have.property(property)
+            //     })
+            // }
+            expect(preparedTx.transaction).to.deep.include(tx.unsignedTx.transaction)
+        })
+    })
 
     // itIf(
     //     protocol.lib.supportsHD,

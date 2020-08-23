@@ -3,12 +3,14 @@ import { MainProtocolSymbols, ProtocolSymbols } from '../../utils/ProtocolSymbol
 import { ProtocolNotSupported } from './errors'
 import { SignedTransactionSerializer } from './signed-transaction.serializer'
 import { AeternitySignedTransactionSerializer } from './signed-transactions/aeternity-transactions.serializer'
+import { HarmonySignedTransactionSerializer } from './signed-transactions/harmony-transactions.serializer'
 import { BitcoinSignedTransactionSerializer } from './signed-transactions/bitcoin-transactions.serializer'
 import { EthereumSignedTransactionSerializer } from './signed-transactions/ethereum-transactions.serializer'
 import { SubstrateSignedTransactionSerializer } from './signed-transactions/substrate-transactions.serializer'
 import { TezosSignedTransactionSerializer } from './signed-transactions/tezos-transactions.serializer'
 import { UnsignedTransactionSerializer } from './unsigned-transaction.serializer'
 import { AeternityUnsignedTransactionSerializer } from './unsigned-transactions/aeternity-transactions.serializer'
+import { HarmonyUnsignedTransactionSerializer } from './unsigned-transactions/harmony-transactions.serializer'
 import { BitcoinUnsignedTransactionSerializer } from './unsigned-transactions/bitcoin-transactions.serializer'
 import { EthereumUnsignedTransactionSerializer } from './unsigned-transactions/ethereum-transactions.serializer'
 import { SubstrateUnsignedTransactionsSerializer } from './unsigned-transactions/substrate-transactions.serializer'
@@ -21,6 +23,7 @@ export function unsignedTransactionSerializerByProtocolIdentifier(protocolIdenti
     btc: BitcoinUnsignedTransactionSerializer,
     grs: BitcoinUnsignedTransactionSerializer,
     ae: AeternityUnsignedTransactionSerializer,
+    one: HarmonyUnsignedTransactionSerializer,
     xtz: TezosUnsignedTransactionSerializer,
     polkadot: SubstrateUnsignedTransactionsSerializer,
     kusama: SubstrateUnsignedTransactionsSerializer
@@ -42,6 +45,7 @@ export function signedTransactionSerializerByProtocolIdentifier(protocolIdentifi
     btc: BitcoinSignedTransactionSerializer,
     grs: BitcoinSignedTransactionSerializer,
     ae: AeternitySignedTransactionSerializer,
+    one: HarmonySignedTransactionSerializer,
     xtz: TezosSignedTransactionSerializer,
     polkadot: SubstrateSignedTransactionSerializer,
     kusama: SubstrateSignedTransactionSerializer
