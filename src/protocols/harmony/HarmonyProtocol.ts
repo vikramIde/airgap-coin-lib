@@ -468,7 +468,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       toShardID: 0,
       chainId: 2,
       gasLimit: gasEstimate,
-      nonce: 3,
+      nonce: nonce,
       data: toUtf8Bytes(payload),
       gasPrice: Unit.One(gasPrice).toHex()
     }
