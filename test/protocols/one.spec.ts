@@ -172,19 +172,19 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
     //     }
     // })
 
-    // itIf(!protocol.lib.supportsHD, 'signWithPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
-    //     const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
-    //     const txs: any[] = []
+    itIf(!protocol.lib.supportsHD, 'signWithPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
+        const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+        const txs: any[] = []
 
-    //     for (const { unsignedTx } of protocol.txs) {
-    //         const tx = await protocol.lib.signWithPrivateKey(privateKey, unsignedTx)
-    //         txs.push(tx)
-    //     }
+        for (const { unsignedTx } of protocol.txs) {
+            const tx = await protocol.lib.signWithPrivateKey(privateKey, unsignedTx)
+            txs.push(tx)
+        }
 
-    //     txs.forEach((tx, index) => {
-    //         expect(tx).to.deep.equal(protocol.txs[index].signedTx)
-    //     })
-    // })
+        txs.forEach((tx, index) => {
+            expect(tx).to.deep.equal(protocol.txs[index].signedTx)
+        })
+    })
 
     // itIf(protocol.lib.supportsHD, 'signWithExtendedPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
     //     const privateKey = await protocol.lib.getExtendedPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)

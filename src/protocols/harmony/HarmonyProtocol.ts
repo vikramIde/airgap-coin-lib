@@ -9,7 +9,7 @@ import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
 const { Harmony } = require('@harmony-js/core');
 const { toUtf8Bytes } = require('@harmony-js/contract');
-import {  getRLPUnsigned } from "./utils";
+import { getRLPUnsigned, RLPSign } from "./utils";
 
 const {
   bip39,
@@ -94,7 +94,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   public addressPlaceholder: string = 'one1_abc...'
 
   // ae specifics
-  public defaultNetworkId: string = '0'
+  public defaultNetworkId: string = '2'
 
   // private readonly feesURL: string = 'https://api-airgap.gke.papers.tech/fees'
   private  hmy = new Harmony(
@@ -264,17 +264,23 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   }
 
 
+  // public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
+  //   console.log(privateKey.toString(),'privateKey')
+  //   const rawTx = transaction.transaction
+  //   const account = this.hmy.wallet.addByPrivateKey(privateKey.toString('hex'));
+  //   console.log(account, 'account')
+  //   const newTxn = this.hmy.transactions.newTx();
+  //   newTxn.recover(rawTx);
+  //   console.log(newTxn, 'newTxn')
+  //   const signedTxn = await account.signTransaction(newTxn);
+  //   console.log(signedTxn, 'signedTxn')
+  //   return signedTxn.rawTransaction
+  // }
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
     console.log(privateKey.toString(),'privateKey')
     const rawTx = transaction.transaction
-    const account = this.hmy.wallet.addByPrivateKey(privateKey.toString('hex'));
-    console.log(account, 'account')
-    const newTxn = this.hmy.transactions.newTx();
-    newTxn.recover(rawTx);
-    console.log(newTxn, 'newTxn')
-    const signedTxn = await account.signTransaction(newTxn);
-    console.log(signedTxn, 'signedTxn')
-    return signedTxn.rawTransaction
+    const rawTransaction = RLPSign(rawTx, privateKey.toString('hex'));
+    return rawTransaction
   }
 
   public async getTransactionDetails(unsignedTx: UnsignedHarmonyTransaction): Promise<IAirGapTransaction[]> {
@@ -466,7 +472,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       value: Unit.Szabo(value).toWei(),
       shardID: 0,
       toShardID: 0,
-      chainId: 2,
+      chainId: parseInt(this.defaultNetworkId),
       gasLimit: gasEstimate,
       nonce: nonce,
       data: toUtf8Bytes(payload),

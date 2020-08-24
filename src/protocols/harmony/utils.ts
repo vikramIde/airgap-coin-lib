@@ -18,6 +18,7 @@ import {
     getAddress,
     arrayify,
     stripZeros,
+    Signature,
     splitSignature
 } from '@harmony-js/crypto';
 import {
@@ -60,9 +61,8 @@ export const handleAddress = (value) => {
     }
 };
 
-export const recover = (rawTransaction) => {
+export const recover = (rawTransaction: string) => {
     const transaction = decode(rawTransaction);
-    console.log(transaction, 'recover')
     const tx = {
         id: '0x',
         from: '0x',
@@ -211,16 +211,16 @@ export const getRLPUnsigned = (txParams: any): [string, any[]] => {
     return [encode(raw), raw];
 }
 
-export const RLPSign = (unsignedRawTransaction, prv) => {
+export const RLPSign = (unsignedRawTransaction: string, prv: string):string  => {
     const raw = decode(unsignedRawTransaction)
     const signature = sign(keccak256(unsignedRawTransaction), prv);
     const signed = getRLPSigned(raw, signature);
-    return [signature, signed];
+    return signed;
 }
-export const sendRawTx = async (signedTx) => {
-    let shardID = 0 //take it as dynamic
+export const sendRawTx = async (signedTx: string,url:string,shardId:string) => {
+    let shardID = shardId //take it as dynamic
     let messenger = new Messenger(
-        new HttpProvider('https://api.s0.b.hmny.io')
+        new HttpProvider(url)
     )
     // console.log(RPCMethod)
     const result = await messenger.send(
@@ -235,7 +235,8 @@ export const sendRawTx = async (signedTx) => {
     return result;
 
 }
-function getRLPSigned(raw, signature) {
+function getRLPSigned(raw: any[], signature: Signature): string {
+
     // temp setting to be compatible with eth
     const rawLength = 11;
     const chainId = 2
