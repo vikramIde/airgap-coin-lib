@@ -3,8 +3,6 @@ import axios  from '../../dependencies/src/axios-0.19.0/index'
 import BigNumber from '../../dependencies/src/bignumber.js-9.0.0/bignumber'
 import { HarmonyTransactionResult, HarmonyTransactionCursor } from './HarmonyTypes'
 
-// import { keccak256 } from '../../dependencies/src/ethereumjs-util-5.2.0/index'
-// import * as bs58check from '../../dependencies/src/bs58check-2.1.2/index'
 import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
 const { Harmony } = require('@harmony-js/core');
@@ -13,26 +11,10 @@ import { getRLPUnsigned, RLPSign, recover, getShardBalance } from "./utils";
 
 const {
   bip39,
-  // hdkey,
-  // EncryptOptions, 
   getAddress,
-  // getAddressFromPublicKey,
-  // generatePrivateKey,
-  // getPubkeyFromPrivateKey,
-  // getAddressFromPrivateKey
   HarmonyAddress
 } = require("@harmony-js/crypto")
-// import { 
-//   bip39, 
-//   // hdkey,
-//   // EncryptOptions, 
-//   getAddress, 
-//   // getAddressFromPublicKey,
-//   // generatePrivateKey,
-//   // getPubkeyFromPrivateKey,
-//   // getAddressFromPrivateKey
-//   HarmonyAddress
-//  } from '@harmony-js/crypto';
+
 
 const { ChainID, ChainType, Unit } = require('@harmony-js/utils');
 import { IAirGapSignedTransaction } from '../../interfaces/IAirGapSignedTransaction'
@@ -40,10 +22,7 @@ import { AirGapTransactionStatus, IAirGapTransaction } from '../../interfaces/IA
 import { UnsignedHarmonyTransaction } from '../../serializer/schemas/definitions/transaction-sign-request-harmony'
 import { SignedHarmonyTransaction } from '../../serializer/schemas/definitions/transaction-sign-response-harmony'
 import { RawHarmonyTransaction } from '../../serializer/types'
-// import bs64check from '../../utils/base64Check'
-// import { padStart } from '../../utils/padStart'
 import { MainProtocolSymbols, ProtocolSymbols } from '../../utils/ProtocolSymbols'
-// import { EthereumUtils } from '../ethereum/utils/utils'
 import { CurrencyUnit, FeeDefaults, ICoinProtocol } from '../ICoinProtocol'
 import { NonExtendedProtocol } from '../NonExtendedProtocol'
 import { HarmonyCryptoClient } from './HarmonyCryptoClient'
@@ -52,7 +31,6 @@ import { HarmonyProtocolOptions } from './HarmonyProtocolOptions'
 import { TransactionListQuery } from './Query/HarmonyTransactionListQuery'
 import { BalanceQuery } from './Query/HarmonyBalanceQuery'
 import { SendQuery } from './Query/HarmonySendQuery'
-// import { EstimateGasQuery } from './Query/HarmonyEstimateGasQuery'
 
 export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtocol {
   public symbol: string = 'ONE'
@@ -175,14 +153,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return this.generateKeyPairFromNode(node, derivationPath).privateKey
   }
 
-  // public async getAddressFromPublicKey(publicKey: string): Promise<string> {
-  //   this.hmy.crypto.getAddressesFromPublicKey()
-  //   SECP256K1.
-  //   const ecKey = SECP256K1.keyFromPublic(publicKey, 'hex');
-  //   const publicHash = ecKey.getPublic(false, 'hex');
-  //   const address = '0x' + keccak256('0x' + publicHash.slice(2)).slice(-40);
-  //   return getAddress(address).bech32;
-  // }
   public async getAddressFromPublicKey(publicKey: string): Promise<string> {
     let key = this.hmy.crypto.getAddressFromPublicKey('0x'+publicKey)
     return getAddress(key).bech32;
@@ -263,19 +233,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
   }
 
-
-  // public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
-  //   console.log(privateKey.toString(),'privateKey')
-  //   const rawTx = transaction.transaction
-  //   const account = this.hmy.wallet.addByPrivateKey(privateKey.toString('hex'));
-  //   console.log(account, 'account')
-  //   const newTxn = this.hmy.transactions.newTx();
-  //   newTxn.recover(rawTx);
-  //   console.log(newTxn, 'newTxn')
-  //   const signedTxn = await account.signTransaction(newTxn);
-  //   console.log(signedTxn, 'signedTxn')
-  //   return signedTxn.rawTransaction
-  // }
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
     // console.log(privateKey.toString(),'privateKey')
     const rawTx = transaction.transaction
@@ -509,12 +466,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     return res
 
   }
-
-  // private toHexBuffer(value: number | BigNumber): Buffer {
-  //   const hexString: string = EthereumUtils.toHex(value).substr(2)
-
-  //   return Buffer.from(padStart(hexString, hexString.length % 2 === 0 ? hexString.length : hexString.length + 1, '0'), 'hex')
-  // }
 
   public async signMessage(message: string, keypair: { publicKey: string, privateKey: Buffer }): Promise<string> {
     return new HarmonyCryptoClient().signMessage(message, keypair)

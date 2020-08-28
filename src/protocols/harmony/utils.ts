@@ -4,8 +4,6 @@
  * @hidden
  */
 
-// import { async } from "../../dependencies/src/validate.js-0.13.1/validate";
-
 const { hexToNumber, isHex, isAddress, add0xToString, strip0x, AddressSuffix } = require('@harmony-js/utils');
 
 const {
