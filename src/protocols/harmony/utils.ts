@@ -4,9 +4,11 @@
  * @hidden
  */
 
-import { hexToNumber, isHex, isAddress, add0xToString, strip0x } from '@harmony-js/utils';
+// import { async } from "../../dependencies/src/validate.js-0.13.1/validate";
 
-import {
+const { hexToNumber, isHex, isAddress, add0xToString, strip0x, AddressSuffix } = require('@harmony-js/utils');
+
+const {
     decode,
     encode,
     keccak256,
@@ -18,14 +20,13 @@ import {
     getAddress,
     arrayify,
     stripZeros,
-    Signature,
     splitSignature
-} from '@harmony-js/crypto';
-import {
+} = require("@harmony-js/crypto")
+const  {
     RPCMethod,
     Messenger,
     HttpProvider
-} from '@harmony-js/network';
+} = require('@harmony-js/network')
 
 export const transactionFields = [
     { name: 'nonce', length: 32, fix: false },
@@ -66,6 +67,8 @@ export const recover = (rawTransaction: string) => {
     const tx = {
         id: '0x',
         from: '0x',
+        blockNumber:'0x',
+        blockHash:'0x',
         rawTransaction: '0x',
         unsignedRawTransaction: '0x',
         nonce: new BN(strip0x(handleNumber(transaction[0]))).toNumber(),
@@ -143,7 +146,7 @@ export const recover = (rawTransaction: string) => {
         tx.rawTransaction = rawTransaction;
         tx.id = keccak256(rawTransaction);
     }
-    console.log(tx, 'rawTransaction')
+    // console.log(tx, 'rawTransaction')
 
     return tx;
 };
@@ -208,6 +211,7 @@ export const getRLPUnsigned = (txParams: any): [string, any[]] => {
         raw.push('0x');
         raw.push('0x');
     }
+    // console.log(raw)
     return [encode(raw), raw];
 }
 
@@ -231,11 +235,44 @@ export const sendRawTx = async (signedTx: string,url:string,shardId:string) => {
             ? Number.parseInt(shardID, 10)
             : shardID,
     );
-    console.log(result)
+    // console.log(result)
     return result;
 
 }
-function getRLPSigned(raw: any[], signature: Signature): string {
+
+export const getShardBalance = async (address:string, shardID: number, url: string, blockNumber: string = 'latest') => {
+    
+    let messenger = new Messenger(
+        new HttpProvider(url)
+    )
+
+    const balance = await messenger.send(
+        RPCMethod.GetBalance,
+        [address, blockNumber],
+        'hmy',
+        shardID,
+    );
+
+    const nonce = await messenger.send(
+        RPCMethod.GetTransactionCount,
+        [address, blockNumber],
+        'hmy',
+        shardID,
+    );
+
+    if (balance.isError()) {
+        throw balance.error.message;
+    }
+    if (nonce.isError()) {
+        throw nonce.error.message;
+    }
+    return {
+        address: `${address}${AddressSuffix}${shardID}`,
+        balance: hexToNumber(balance.result),
+        nonce: Number.parseInt(hexToNumber(nonce.result), 10),
+    };
+}
+function getRLPSigned(raw: any[], signature: string): string {
 
     // temp setting to be compatible with eth
     const rawLength = 11;
@@ -255,3 +292,4 @@ function getRLPSigned(raw: any[], signature: Signature): string {
 
     return encode(raw);
 }
+

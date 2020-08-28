@@ -9,7 +9,7 @@ import SECP256K1 = require('../../dependencies/src/secp256k1-3.7.1/elliptic')
 import { BIP32Interface, fromSeed } from '../../dependencies/src/bip32-2.0.4/src/index'
 const { Harmony } = require('@harmony-js/core');
 const { toUtf8Bytes } = require('@harmony-js/contract');
-import { getRLPUnsigned, RLPSign } from "./utils";
+import { getRLPUnsigned, RLPSign, recover, getShardBalance } from "./utils";
 
 const {
   bip39,
@@ -222,13 +222,14 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       })
     )
 
-    const transactions: any[] = [].concat(
+    let transactions: any[] = [].concat(
       ...allTransactions.map((axiosData) => {
         return axiosData || []
       })
     )
-    
-    transactions.map((obj) => {
+
+    transactions = transactions.map((obj) => {
+
       const parsedTimestamp = parseInt(obj.timestamp, 10)
       const airGapTx: IAirGapTransaction = {
         amount: new BigNumber(obj.value).toString(10),
@@ -238,7 +239,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
         protocolIdentifier: this.identifier,
         network: this.options.network,
         to: [obj.to],
-        hash: obj.blockHash,
+        hash: obj.hash,
         blockHeight: obj.blockNumber,
         extra:{
           'shardID': obj.shardID,
@@ -254,7 +255,6 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
       if (!isNaN(parsedTimestamp)) {
         airGapTx.timestamp = Math.round(parsedTimestamp / 1000)
       }
-
       return airGapTx
     })
     return { transactions, cursor: { offset: cursor ? cursor.offset : limit } }
@@ -277,7 +277,7 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   //   return signedTxn.rawTransaction
   // }
   public async signWithPrivateKey(privateKey: Buffer, transaction: RawHarmonyTransaction): Promise<IAirGapSignedTransaction> {
-    console.log(privateKey.toString(),'privateKey')
+    // console.log(privateKey.toString(),'privateKey')
     const rawTx = transaction.transaction
     const rawTransaction = RLPSign(rawTx, privateKey.toString('hex'));
     return rawTransaction
@@ -286,39 +286,31 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
   public async getTransactionDetails(unsignedTx: UnsignedHarmonyTransaction): Promise<IAirGapTransaction[]> {
     // console.log(unsignedTx)
     const transaction = unsignedTx.transaction.transaction
-    const newTxn = this.hmy.transactions.newTx();
+    const newTxn = recover(transaction);
     let sender:string=''
     let reciever:string=''
     // let value:number =0
-    // let fee:number =0
-    newTxn.recover(transaction);
-    // console.log(newTxn)
+    // let fee:string ='0'
+    let feeInWei: number=0
+    // console.log(newTxn,'newTxn')
 
     if (newTxn.from !='0x')
-    sender = this.hmy.crypto.getAddress(newTxn.from).bech32
+    sender = getAddress(newTxn.from).bech32
 
     if (newTxn.to != '0x')
-    reciever = this.hmy.crypto.getAddress(newTxn.to).bech32
+    reciever = getAddress(newTxn.to).bech32
 
-    // if (newTxn.value.toString(10)) {
-    //   const coins = new this.hmy.utils.Unit(newTxn.value)
-    //     .asWei()
-    //     .toOne();
-    //   value = parseInt(coins) * 10000
 
-    // }
-
-    // if (newTxn.gasPrice.toString(10)) {
-    //    fee = new this.hmy.utils.Unit(newTxn.gasPrice)
-    //     .asWei()
-    //     .toOne()
-    // }
-
+    if (newTxn.gasLimit.toString(10)) {
+        // fee = Unit.Szabo(newTxn.gasLimit).toWei()
+        feeInWei = parseFloat(newTxn.gasLimit.toString())*10000000000
+      }
+    // console.log(newTxn.gasLimit.toString(),'fee-test')
     // let coins = new BigNumber(Number('0x' + newTxn.value.toString('hex'))).div(1e12).toNumber()
 
     const newAirgapTx: IAirGapTransaction = {
-        amount: newTxn.value,
-        fee: newTxn.gasPrice,
+        amount: newTxn.value.toString(),
+        fee: feeInWei.toString(),
         from: [sender],
         isInbound: false,
         protocolIdentifier: this.identifier,
@@ -333,9 +325,10 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
         },
         transactionDetails: unsignedTx.transaction
       }
-    if (newTxn.input) {
-      newAirgapTx.data = newTxn.input
+    if (newTxn.data) {
+      newAirgapTx.data = newTxn.data
     }
+    // console.log(newAirgapTx)
     return [newAirgapTx]
   }
 
@@ -440,9 +433,14 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
 
     try {
       
-      const  ts = await this.getTransactionsFromAddresses([address], 1)
-      if (ts.transactions.length>0)
-        nonce = ts.transactions[0].extra.nonce + 1
+      const ts = await getShardBalance(
+        address,
+        0,
+        this.options.network.rpcUrl,
+        )
+      if (ts!==undefined)
+        nonce = ts.nonce;
+
     } catch (error) {
       // if node returns 404 (which means 'no account found'), go with nonce 0
       if (error.response && error.response.status !== 404) {
@@ -460,11 +458,12 @@ export class HarmonyProtocol extends NonExtendedProtocol implements ICoinProtoco
     const sender = new HarmonyAddress(address).checksum
     const reciever = new HarmonyAddress(recipients[0]).checksum
     const gasPrice = default_gas_price.toFixed(9)
-    const gasEstimate = 42000
+    const gasEstimate: number = Unit.Szabo(fee).asWei().toOne() * 100000000
+    
     let value = coins * 1000000
 
     if (!payload) {
-      payload = '0x'
+      payload = ''
     }
     const txn = {
       from: sender,

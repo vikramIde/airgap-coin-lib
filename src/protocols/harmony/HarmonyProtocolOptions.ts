@@ -9,7 +9,7 @@ const MAINNET_NAME: string = 'Mainnet'
 // const NODE_URL: string = 'https://api.s0.t.hmny.io'
 const NODE_URL: string = 'https://api.s0.b.hmny.io'
 
-const BLOCK_EXPLORER_URL: string = 'https://explorer.harmony.one/#'
+const BLOCK_EXPLORER_URL: string = 'https://explorer.pops.one'
 
 export class HarmonyBlockExplorer implements ProtocolBlockExplorer {
   constructor(public readonly blockExplorer: string = BLOCK_EXPLORER_URL) {}
@@ -18,7 +18,7 @@ export class HarmonyBlockExplorer implements ProtocolBlockExplorer {
     return `${this.blockExplorer}/address/${address}`
   }
   public async getTransactionLink(transactionId: string): Promise<string> {
-    return `${this.blockExplorer}/tx/${transactionId}`
+    return `${this.blockExplorer}/#/tx/${transactionId}`
   }
 }
 

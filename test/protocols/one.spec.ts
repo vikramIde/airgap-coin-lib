@@ -6,7 +6,7 @@ import 'mocha'
 // import axios from '../../src/dependencies/src/axios-0.19.0/index'
 // import BigNumber from '../../src/dependencies/src/bignumber.js-9.0.0/bignumber'
 // import { RawHarmonyTransaction } from '../../src/serializer/types'
-// import { IAirGapTransaction } from '../../src'
+import { IAirGapTransaction } from '../../src'
 
 import { ONETestProtocolSpec } from './specs/one'
 
@@ -172,19 +172,19 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
     //     }
     // })
 
-    itIf(!protocol.lib.supportsHD, 'signWithPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
-        const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
-        const txs: any[] = []
+    // itIf(!protocol.lib.supportsHD, 'signWithPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
+    //     const privateKey = await protocol.lib.getPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
+    //     const txs: any[] = []
 
-        for (const { unsignedTx } of protocol.txs) {
-            const tx = await protocol.lib.signWithPrivateKey(privateKey, unsignedTx)
-            txs.push(tx)
-        }
+    //     for (const { unsignedTx } of protocol.txs) {
+    //         const tx = await protocol.lib.signWithPrivateKey(privateKey, unsignedTx)
+    //         txs.push(tx)
+    //     }
 
-        txs.forEach((tx, index) => {
-            expect(tx).to.deep.equal(protocol.txs[index].signedTx)
-        })
-    })
+    //     txs.forEach((tx, index) => {
+    //         expect(tx).to.deep.equal(protocol.txs[index].signedTx)
+    //     })
+    // })
 
     // itIf(protocol.lib.supportsHD, 'signWithExtendedPrivateKey - Is able to sign a transaction using a PrivateKey', async () => {
     //     const privateKey = await protocol.lib.getExtendedPrivateKeyFromMnemonic(protocol.mnemonic(), protocol.lib.standardDerivationPath)
@@ -200,30 +200,30 @@ describe(`ICoinProtocol Harmony - Custom Tests`, async () => {
     //     })
     // })
 
-    // it('getTransactionDetails - Is able to extract all necessary properties from a TX', async () => {
-    //     for (const tx of protocol.txs) {
-    //         const airgapTxs: IAirGapTransaction[] = await protocol.lib.getTransactionDetails({
-    //             publicKey: protocol.wallet.publicKey,
-    //             transaction: tx.unsignedTx
-    //         })
+    it('getTransactionDetails - Is able to extract all necessary properties from a TX', async () => {
+        for (const tx of protocol.txs) {
+            const airgapTxs: IAirGapTransaction[] = await protocol.lib.getTransactionDetails({
+                publicKey: protocol.wallet.publicKey,
+                transaction: tx.unsignedTx
+            })
 
-    //         if (airgapTxs.length !== 1) {
-    //             throw new Error('Unexpected number of transactions')
-    //         }
+            if (airgapTxs.length !== 1) {
+                throw new Error('Unexpected number of transactions')
+            }
 
-    //         const airgapTx: IAirGapTransaction = airgapTxs[0]
+            const airgapTx: IAirGapTransaction = airgapTxs[0]
 
-    //         expect(airgapTx.to, 'to property does not match').to.deep.equal(tx.to)
-    //         // expect(airgapTx.from, 'from property does not match').to.deep.equal(tx.from)
+            expect(airgapTx.to, 'to property does not match').to.deep.equal(tx.to)
+            // expect(airgapTx.from, 'from property does not match').to.deep.equal(tx.from)
 
-    //         expect(airgapTx.amount, 'amount does not match').to.deep.equal(protocol.txs[0].amount)
-    //         expect(airgapTx.fee, 'fee does not match').to.deep.equal(protocol.txs[0].fee)
+            expect(airgapTx.amount, 'amount does not match').to.deep.equal(protocol.txs[0].amount)
+            expect(airgapTx.fee, 'fee does not match').to.deep.equal(protocol.txs[0].fee)
 
-    //         expect(airgapTx.protocolIdentifier, 'protocol-identifier does not match').to.equal(protocol.lib.identifier)
+            expect(airgapTx.protocolIdentifier, 'protocol-identifier does not match').to.equal(protocol.lib.identifier)
 
-    //         // expect(airgapTx.transactionDetails, 'extras should exist').to.not.be.undefined
-    //     }
-    // })
+            // expect(airgapTx.transactionDetails, 'extras should exist').to.not.be.undefined
+        }
+    })
 
     // it('getTransactionDetailsFromSigned - Is able to extract all necessary properties from a TX', async () => {
     //     for (const tx of protocol.txs) {
